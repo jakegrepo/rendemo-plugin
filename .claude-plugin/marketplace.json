@@ -1,0 +1,17 @@
+{
+  "name": "rendemo",
+  "description": "The Rendemo plugin: embed a published demo, or author a product tour anchored to markers in your own source.",
+  "repository": "https://github.com/jakegrepo/rendemo-plugin",
+  "owner": {
+    "name": "Rendemo",
+    "url": "https://www.rendemo.com"
+  },
+  "plugins": [
+    {
+      "name": "rendemo",
+      "source": "./",
+      "description": "Install a published Rendemo demo on a website, and author product tours anchored to data-rendemo markers in your own source.",
+      "homepage": "https://www.rendemo.com"
+    }
+  ]
+}

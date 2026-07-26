@@ -1,0 +1,112 @@
+---
+description: Start here — pick a Rendemo demo or a Rendemo tour, then hand off
+argument-hint: <what you want — e.g. "show our product on the pricing page" or "walk new users through setup">
+---
+
+The user's intent: $ARGUMENTS
+
+## First, before anything else: one readiness check
+
+A missing token, a token for the wrong workspace, or a tour whose markers are no longer in source all
+surface today as an error *partway through authoring*, after the repo has been read and the steps
+proposed. All of it is knowable in one second. **Run this as your first act, before asking the user a
+single question:**
+
+```bash
+npx --yes rendemo doctor
+```
+
+It prints a six-line block: sign-in, workspace, tours, MCP server, MCP headers, version. It touches
+nothing and publishes nothing. The **MCP headers** line runs the plugin's `headersHelper` command
+(`npx --yes rendemo token`) to prove the MCP server can actually reach the stored token, so it can take
+a few seconds on a machine with a cold npx cache.
+
+**Then say ONE line about readiness before you ask anything else**, e.g. *"Signed in to Acme, tours
+check out — which of these did you mean?"* or *"You are not signed in yet; `npx rendemo login` fixes
+that in about twenty seconds."* One line. Do not paste the whole block unless something failed.
+
+How to read it:
+
+- **`✗ Sign-in`** — nothing is stored and `RENDEMO_API_TOKEN` is not set. Tell the user to run
+  `npx rendemo login`: it prints a short code and a URL, they approve in a browser where they are
+  already signed in, and the token is stored for them. **Do not run `login` for them without asking**
+  — it waits on a human approving in a browser, and starting it unasked leaves a terminal blocked.
+  Nothing else in this command works until this is fixed, so stop here and say so.
+- **`✗ Workspace`** — the token was rejected, or the deployment answered an error. Say which; the fix
+  is `npx rendemo login` again for the first and "try shortly" for the second.
+- **`? Workspace`** — unreachable. That is a network problem, **not** a bad token. Do not tell them to
+  re-authenticate.
+- **`✗ Tours`** — this repo already has a tour whose steps no longer resolve. Worth naming up front:
+  it usually means someone deleted or moved a marked element, and `/rendemo-tour` can repair it.
+- **`✗ MCP headers`** — the token is stored and valid, but the command the MCP server uses to *read* it
+  cannot run, and `RENDEMO_API_TOKEN` is not set either. So every tool call will 401 even though the
+  sign-in looks fine. This is a blocker exactly like `✗ Sign-in`: stop and relay what the line says. It
+  normally means `npx` is not on PATH, or the npx cache holds a `rendemo` older than 0.4.0.
+- **`? MCP headers`** — the helper works but sends a *different* token than the one doctor checked, so
+  the Workspace line above is about a credential the MCP will not use. Say so; do not trust the
+  workspace name.
+- **`· Tours`** (no lockfile), **`· MCP server`**, **`· MCP headers`** and **`· Version`** —
+  informational. Never block on these; a repo with no tour yet is the normal starting state, and a
+  `· MCP headers` means something else is already authenticating (usually `RENDEMO_API_TOKEN`).
+
+If `npx` is unavailable or the command cannot run at all, say so in that same one line and continue —
+a preflight that cannot run must not stop the work. Do not substitute a guess about readiness.
+
+## The two things Rendemo makes
+
+Rendemo makes exactly two things, and they are not variations of each other:
+
+- **A demo** — a recording of your product that a visitor **watches** in an iframe on your site. Nobody
+  touches your real app; you record once and it replays.
+- **A tour** — step-by-step guidance on your **own live product**, which the person **performs for
+  real**. Cards anchor to `data-rendemo` markers you put in your source and advance when they do the
+  thing.
+
+Watching versus doing is the whole distinction. A demo goes on a marketing page for someone who has not
+signed up; a tour goes inside the app for someone who has.
+
+## Route it
+
+**If `$ARGUMENTS` already makes the intent obvious, do not run a quiz.** Say which one you picked and
+the word in their request that decided it, then go.
+
+Signals for a **demo**: "on our pricing page", "on the site", "landing page", "watch", "video",
+"already recorded", "share with a prospect", a named published demo.
+
+Signals for a **tour**: "in the app", "our users", "onboarding", "walk them through", "guide them",
+"first-run", "empty state", "product tour", "they should click", a route inside the product.
+
+Then:
+
+- **Demo** → run `/rendemo-demo` with their intent, or invoke the `rendemo:embed-a-demo` skill
+  directly and follow it end to end.
+- **Tour** → run `/rendemo-tour` with their intent, or invoke the `rendemo:author-a-tour` skill
+  directly and follow it end to end.
+
+**If the intent is genuinely ambiguous, or `$ARGUMENTS` is empty, ask one question — not a
+questionnaire:**
+
+> Do you want visitors to **watch** a recording of the product (a demo, embedded on a page), or to be
+> **guided through your real product while they use it** (a tour, anchored to markers in your source)?
+
+Two cases worth naming rather than guessing at:
+
+- **"I want a demo of our onboarding for new users."** Ambiguous on purpose — "demo" is a generic word
+  and "for new users" points inside the app. Ask.
+- **"Both."** That is legitimate and common: a demo on the marketing page, a tour once they are in. Do
+  them one at a time, tour last, because it writes into their source and needs their attention.
+
+## Before you hand off
+
+Two facts that change the answer and are cheap to check now rather than halfway through:
+
+- A **demo must already be published** to be embedded. If it is not, the demo path stops and asks —
+  publishing makes it world-visible and that is not yours to decide.
+- A **tour writes attributes into their source files** and needs `data-rendemo` markers shipped to
+  production. If they cannot modify the product's code, a tour is not available to them and a demo is
+  the honest answer.
+
+Do not start scanning the repo, listing projects, or calling MCP tools from this command. `npx rendemo
+doctor` is the one exception, and only because it is offline-safe, read-only, and answers the question
+that otherwise gets answered halfway through the work. Pick the path, say why, hand off. The skill you
+hand to has its own approval gates and they exist for reasons that this command cannot restate in full.

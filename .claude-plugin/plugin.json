@@ -1,0 +1,18 @@
+{
+  "name": "rendemo",
+  "description": "Install a published Rendemo demo on a website, and author product tours anchored to data-rendemo markers in your own source. Wraps the Rendemo MCP server so you state an intent instead of picking tools.",
+  "author": {
+    "name": "Rendemo",
+    "url": "https://www.rendemo.com"
+  },
+  "homepage": "https://www.rendemo.com",
+  "repository": "https://github.com/jakegrepo/rendemo-plugin",
+  "keywords": [
+    "rendemo",
+    "demo",
+    "embed",
+    "tour",
+    "onboarding",
+    "mcp"
+  ]
+}

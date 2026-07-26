@@ -1,0 +1,10 @@
+{
+  "rendemo": {
+    "type": "http",
+    "url": "https://www.rendemo.com/api/mcp/mcp",
+    "headers": {
+      "Authorization": "Bearer ${RENDEMO_API_TOKEN}"
+    },
+    "headersHelper": "npx --yes rendemo token"
+  }
+}
