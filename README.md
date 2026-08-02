@@ -156,6 +156,31 @@ Restart Claude Code afterwards — MCP servers are wired up at startup.
 - **Node 20 or newer on `PATH`**, because the helper is a Node script. (The old helper needed `npx`,
   so this is strictly less than before.)
 
+### Updating — it is two commands, and the first one is the one people miss
+
+```bash
+claude plugin marketplace update rendemo
+claude plugin update rendemo@rendemo
+```
+
+Then restart Claude Code.
+
+**Running only the second one will tell you that you are already up to date, and it will be wrong.**
+Claude Code installs from a local *clone* of this repo, and `plugin update` compares against that clone
+— not against GitHub. Until the marketplace is refreshed the clone is whatever it was when you
+installed, so a plugin released this morning is invisible and the update command says so confidently.
+It is the single most likely reason a fix described in these notes appears not to have shipped.
+
+Two smaller edges worth knowing:
+
+- `claude plugin update rendemo` fails with `Plugin "rendemo" not found`. The name has to be qualified
+  with its marketplace: `rendemo@rendemo`.
+- This plugin deliberately publishes **no `version` field**, so Claude Code uses the git commit as the
+  version — `claude plugin list` shows a SHA like `1a2c3c4ef96d` rather than a number. That is why
+  every commit is an update (see [Why `plugin.json` has no `version`](#why-pluginjson-has-no-version)),
+  and also why there is no version number to compare against by eye. To check what you are on, compare
+  that SHA to the latest commit on this repo.
+
 ## The token step
 
 The Rendemo MCP endpoint authenticates with a **per-workspace** bearer token, so no token can ship
