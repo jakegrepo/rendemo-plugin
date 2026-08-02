@@ -1,38 +1,44 @@
 # The Rendemo Claude Code plugin
 
-Rendemo's MCP server has ~65 tools. That is an API, not an interface: you would have to know which
+Rendemo's MCP server has ~70 tools. That is an API, not an interface: you would have to know which
 tool to call, in what order, with what arguments. This plugin ships the **workflow** instead — you
 state an intent and the agent sequences the tools, stops at the checkpoints that matter, and writes
 the files the MCP cannot touch.
 
+Generated recordings are evidence-led: incidental page/recorder clicks are discarded, arming and
+trailing idle time are trimmed, and captured interactions receive action-safe presentation recipes.
+Before publishing, the workflow must run `rendemo_review_step_presentations`; invalid targets,
+role-incompatible recipes, missing required content, and copy overflow are publish blockers.
+
 ```
-/rendemo                 pick between the two, if you're not sure which you want
-/rendemo-demo            add our onboarding demo to the pricing page
-/rendemo-tour            onboarding for new users
+/rendemo:start           pick between the two, if you're not sure which you want
+/rendemo:demo            add our onboarding demo to the pricing page
+/rendemo:tour            onboarding for new users
 ```
 
 ## Two things, and they are not variations of each other
 
 - **A demo** is a recording of your product that a visitor **watches** in an iframe on your site.
-  Nobody touches your real app. Installed with `<rendemo-demo demo="…">`, inline or as a modal.
+  Nobody touches your real app. Installed with one script tag carrying `data-demo`, inline or as a
+  modal.
 - **A tour** is step-by-step guidance on your **own live product**, which the person **performs for
   real**. Cards anchor to `data-rendemo` markers in your source and advance when they do the thing.
-  Installed with `<rendemo-demo demo="…" mode="tour">`.
+  Same tag, plus `data-mode="tour"`.
 
 Watching versus doing is the whole distinction. A demo goes on a marketing page for someone who has not
-signed up; a tour goes inside the app for someone who has. `/rendemo` asks in one question if that is
+signed up; a tour goes inside the app for someone who has. `/rendemo:start` asks in one question if that is
 not obvious from what you typed.
 
-## Read this before using `/rendemo-tour`
+## Read this before using `/rendemo:tour`
 
 **Tours render to a user.** A published tour runs in your product through
-`<rendemo-demo demo="<tour>" mode="tour">`: it resolves each step's `data-rendemo` marker on your live
+one script tag with `data-mode="tour"`: it resolves each step's `data-rd` marker on your live
 DOM, shows the same step card the published demo shows, waits for the viewer to do the real thing, and
 remembers where they were across pages and reloads. See **Tours and the marker contract**,
 **Tours (`mode="tour"`)** and **Previewing a tour** in `docs/mcp/EMBED.md` for the element, the payload
 route and the exact behaviour.
 
-What `/rendemo-tour` produces: `data-rendemo` markers in your source that a human reviewed, a preview
+What `/rendemo:tour` produces: `data-rendemo` markers in your source that a human reviewed, a preview
 link you look at **before** anything goes live, a published tour, a committed `rendemo.tours.json`, an
 offline check that fails your build when someone deletes an element a step points at, and one script
 tag that makes it run.
@@ -40,8 +46,9 @@ tag that makes it run.
 **The optional attributes:**
 
 ```html
-<rendemo-demo demo="acme/onboarding" mode="tour"
-              user="u_123" routes="/app,/app/projects" when="always"></rendemo-demo>
+<script src="https://www.rendemo.com/embed.js"
+        data-demo="acme/onboarding" data-mode="tour"
+        data-user="u_123" data-routes="/app,/app/projects" data-when="always" async></script>
 ```
 
 `user` makes progress and the analytics per person instead of per browser (any opaque string you
@@ -73,11 +80,11 @@ spelling can be served from a CDN cache long after `embed.js` updates. Do not wr
   (**Settings → Product tours**), neither deletes anything, and the payload's 30-second cache bounds
   how long it keeps being served. A tour already running in a visitor's tab finishes.
 
-`/rendemo-demo` remains the one for the "watch it without doing it for real" case.
+`/rendemo:demo` remains the one for the "watch it without doing it for real" case.
 
 ## Changing a tour you already have
 
-`/rendemo-tour` covers the second visit too — it calls `rendemo_list_tours` first and branches itself,
+`/rendemo:tour` covers the second visit too — it calls `rendemo_list_tours` first and branches itself,
 because "onboarding for new users" is what you type whether or not that tour exists, and a separate
 edit command would make you know which state you are in before you could name the command.
 
@@ -96,6 +103,30 @@ edit command would make you know which state you are in before you could name th
 
 Every edit needs a republish and a regenerated lockfile before anything a visitor sees changes.
 
+## Presentation workflow
+
+The plugin uses Rendemo's single presentation engine. It discovers recipes, proposes a varied
+whole-demo direction, applies only registry-supported module combinations, and opens the signed
+real-render review before publish. The generated recipe/material/motion/target matrix is in
+[`presentation-capabilities.md`](presentation-capabilities.md); it is checked in CI against the same
+registry used by Studio, replay, published demos, live tours, and MCP.
+
+Per-step typography is part of that validated model. Authors can select and type into visible card
+text in Studio, then format that individual block from the contextual toolbar; MCP can write the
+same semantic `textStyles` fields. Authors can also add a semantic line, gradient, or glow border
+with still, trace, sweep, orbit, pulse, or march motion. Width, radius, two colors, speed, and
+direction remain bounded and portable across Studio, replay, tours, and MCP; reduced-motion viewers
+receive the finished still border. Fixed compositions automatically move or open around measured
+targets rather than covering them.
+
+Once one card is approved, `rendemo_apply_step_presentation_style_to_all` applies its material,
+compatible motion, typography, per-block text formatting, and border to every card. It deliberately
+preserves each step's recipe, layout, target relationship, copy, branching, and media.
+
+The card-to-target beam is opt-in. Leave `targetBeam` false for the default clean presentation;
+enable it through `rendemo_set_demo_presentation_theme` only when the connector materially clarifies
+the target.
+
 ## Install
 
 `plugin/` is both the plugin root and its own marketplace, so it installs from a local path or from
@@ -112,6 +143,19 @@ Or in an interactive session, `/plugin` and pick it from the marketplace you add
 
 Restart Claude Code afterwards — MCP servers are wired up at startup.
 
+### Requirements
+
+- **A recent Claude Code.** The plugin's `headersHelper` locates the script it ships via
+  `${CLAUDE_PLUGIN_ROOT}`, and old builds passed that placeholder to the shell literally instead of
+  substituting it. Verified substituting on **2.1.217 and 2.1.219**; **2.1.158 did not**. The exact
+  cutoff between those two is not something we have pinned down, so if you are on anything older than
+  2.1.217 and the Rendemo tools do not appear, that is the first thing to suspect — the helper fails
+  instantly rather than misbehaving, and `npx rendemo doctor` names it. On an older Claude Code, use
+  `npx rendemo login` and take the `~/.claude.json` option: that entry carries the token itself and
+  needs no helper, no substitution and no particular version.
+- **Node 20 or newer on `PATH`**, because the helper is a Node script. (The old helper needed `npx`,
+  so this is strictly less than before.)
+
 ## The token step
 
 The Rendemo MCP endpoint authenticates with a **per-workspace** bearer token, so no token can ship
@@ -120,15 +164,37 @@ for CI and overrides.
 
 **You do not have to export anything.** The plugin's `.mcp.json` declares a Claude Code
 [`headersHelper`](https://code.claude.com/docs/en/mcp): a command whose stdout supplies the request
-headers. It runs `npx --yes rendemo token`, which reads the token `rendemo login` stored and prints
-`{"Authorization":"Bearer …"}`. So logging in is the whole setup.
+headers. It runs `bin/mcp-token.mjs`, a script the plugin ships, which reads the token `rendemo login`
+stored and prints `{"Authorization":"Bearer …"}`. So logging in is the whole setup.
 
-That matters because the header beside it, `Bearer ${RENDEMO_API_TOKEN}`, resolves **from the
-environment of the shell that launched `claude`** — it has never been able to see the config file
-`rendemo login` writes. Before the helper, a successful login left the MCP unable to authenticate until
-you also exported the variable by hand, which is a setup step that reports success and leaves the thing
-broken. Both are declared now, and Claude Code merges them with the helper winning, so the helper covers
-a stored login and the plain header stays as a floor under it.
+That matters because a static `Bearer ${RENDEMO_API_TOKEN}` header resolves **from the environment of
+the shell that launched `claude`** — it can never see the config file `rendemo login` writes. Without a
+helper, a successful login left the MCP unable to authenticate until you also exported the variable by
+hand: a setup step that reports success and leaves the thing broken. The helper reads
+`RENDEMO_API_TOKEN` too, first, so the CI path is unchanged and there is nothing left for a second
+static header to add.
+
+### Why the helper is a shipped script and not `npx rendemo token`
+
+It used to be `npx --yes rendemo token`, and that was the single biggest source of "the Rendemo tools
+did not load."
+
+Claude Code gives a `headersHelper` **ten seconds**, and a helper that misses it fails *silently* — no
+tools, no error, nothing in the session to indicate why. `npx` re-resolves the package on every session
+start, and that is not a fixed cost. Measured across 20 logged connection attempts on one machine with a
+**warm** cache: successful runs took 1.0, 1.2, 1.3, 1.5, 1.7, 1.8, 2.0, 2.1, 2.3, 2.4, 2.9, 4.1, 4.4,
+5.8, 6.2 and 9.4 seconds — and three runs hit the wall and failed. A 15% failure rate, worst when a
+session starts many MCP servers at once, which is exactly when you are least likely to suspect the
+token.
+
+The token lookup underneath was never the cost. The same work, done by the shipped script, is **~0.1
+seconds** — no npm, no registry, no network, just a file read. That is the whole change: a race became
+a file read.
+
+If you have a repo-scoped `.mcp.json` that still declares the `npx` form, it keeps working — it is the
+only form available to a committed file, which has no plugin directory to point at. `npx rendemo doctor`
+now measures it against the budget and warns when it is close, rather than reporting a single fast
+sample as healthy.
 
 ### `npx rendemo login` (recommended)
 
@@ -155,7 +221,7 @@ only way past that.
 Then `npx rendemo doctor` confirms it in one block: sign-in, workspace, tours, MCP server, **MCP
 headers**, version. That fifth line runs the helper command itself and checks that it produces a usable
 `Authorization` header inside the 10 seconds Claude Code allows — so "signed in, and the MCP still 401s"
-cannot be reported as ready. `/rendemo` runs the same check as its first act.
+cannot be reported as ready. `/rendemo:start` runs the same check as its first act.
 
 ### CI, and overriding by hand
 
@@ -199,24 +265,24 @@ plugin/
 │   └── marketplace.json     so plugin/ can be added as a marketplace directly
 ├── .mcp.json                the Rendemo MCP server (HTTP + headersHelper + bearer fallback)
 ├── commands/
-│   ├── rendemo.md           /rendemo         — router: demo or tour?
-│   ├── rendemo-demo.md      /rendemo-demo
-│   └── rendemo-tour.md      /rendemo-tour
+│   ├── start.md             /rendemo:start   — router: demo or tour?
+│   ├── demo.md              /rendemo:demo
+│   └── tour.md              /rendemo:tour
 ├── skills/
 │   ├── embed-a-demo/SKILL.md
 │   └── author-a-tour/SKILL.md
 └── README.md
 ```
 
-### `/rendemo <what you want>`
+### `/rendemo:start <what you want>`
 
-The router. **Runs `npx rendemo doctor` first** and says one line about readiness — a missing token or
+The router. **Runs `npx rendemo doctor` first** and folds readiness into one clause — a missing token or
 a tour whose markers have gone otherwise surfaces halfway through the work, after the repo has been
-read and the steps proposed. Then it explains demo versus tour in one line each and hands off. If what
-you typed already makes the intent obvious it says which one it picked and why, then goes — it does
-not interrogate someone who was already clear.
+read and the steps proposed. Then it hands off. If what you typed already makes the intent obvious it
+just goes: it neither interrogates someone who was already clear, nor narrates which word decided the
+route and which skill it is invoking.
 
-### `/rendemo-demo <what to embed, and where>`
+### `/rendemo:demo <what to embed, and where>`
 
 Installs a **published** demo on your site, end to end:
 
@@ -226,7 +292,12 @@ Installs a **published** demo on your site, end to end:
 - calls `rendemo_get_embed` and writes the wrapper component, the `embed.js` script tag in the right
   place for that framework, and the snippet where the demo should appear,
 - runs your typecheck and reports the caveats that actually apply to your repo (a strict `script-src`
-  CSP must allow `https://www.rendemo.com`; password-protected demos cannot be embedded today).
+  CSP must allow `https://www.rendemo.com`).
+
+It **stops before writing anything** if the demo is password-protected. Those cannot be embedded at
+all — the access cookie is dropped inside a third-party iframe, so the visitor loops back to the
+password form forever — and `rendemo_list_projects` reports protection, so this is caught when the
+demo is picked rather than after the files are on disk. Link to the demo directly instead.
 
 The wrapper it writes may do exactly two things: forward props to attributes, and bridge the
 element's five declared events (`rendemo:ready`, `rendemo:step`, `rendemo:complete`, `rendemo:lead`,
@@ -235,15 +306,17 @@ site at once — a wrapper lives in your repo, where it cannot.
 
 It will not publish a demo without asking. Publishing makes it world-visible.
 
-### `/rendemo-tour <the tour to build>`
+### `/rendemo:tour <the tour to build>`
 
-Authors a tour — read what is still absent, above, first. It:
+Authors a tour. What is still absent is listed above and is worth reading — but the command does not
+recite it at you before it starts, because none of it can be judged before you have seen a step. Each
+limit is raised where it changes a decision instead: targeting and cross-device progress when it hands
+you the element, DNT before it publishes, branching only if you want a fork. It:
 
-- states what a tour does and does not do yet (no targeting rule engine, no cross-device progress,
-  DNT as the only privacy posture, viewer-chosen branching only) and waits for a go-ahead,
-- reads your repo to find the sequence (delegating the scan to a subagent on a large codebase),
+- reads your repo to find the sequence (delegating the scan to a subagent on a large codebase) —
+  **without stopping to ask first**, since reading code is free and reversible,
 - proposes the steps as a table with a `file:line` for every target element, and **waits for
-  approval** before creating anything,
+  approval** there — that table is the real checkpoint, being the first thing you can actually judge,
 - creates the tour, adds the steps, and writes the exact `data-rendemo` attributes the tools hand
   back onto the real elements — as a reviewable diff,
 - **hands you a preview link and waits while you look at it** (below),
@@ -256,8 +329,8 @@ Authors a tour — read what is still absent, above, first. It:
 - hands you the two lines that make it run:
 
 ```html
-<script src="https://www.rendemo.com/embed.js" async></script>
-<rendemo-demo demo="<workspace>/<tour-slug>" mode="tour"></rendemo-demo>
+<script src="https://www.rendemo.com/embed.js"
+        data-demo="<workspace>/<tour-slug>" data-mode="tour" async></script>
 ```
 
 Markers must ship to production — they are what the tour anchors to at runtime. Do not strip them.

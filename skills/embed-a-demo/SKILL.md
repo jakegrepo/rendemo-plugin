@@ -1,7 +1,7 @@
 ---
 name: embed-a-demo
 description: This skill should be used when the user asks to "embed a demo", "add our demo to the pricing page", "install a Rendemo demo", "put the product demo on the site", mentions `<rendemo-demo>`, `embed.js`, or `rendemo_get_embed`, or wants an interactive Rendemo demo rendered inside their own app or marketing site. Sequences the whole install: pick the demo, detect the framework, write the wrapper, place the script tag.
-version: 0.2.0
+version: 0.3.0
 ---
 
 # Install a published Rendemo demo on a site
@@ -19,7 +19,7 @@ The MCP cannot touch a filesystem. Every tool here hands back **text you write**
 
 ## 1. Find the demo
 
-Call `rendemo_list_projects`. Each project reports `demo: { id, status }` or `null`.
+Call `rendemo_list_projects`. Each project reports `demo: { id, status, protected }` or `null`.
 
 - **Exactly one plausible match** by name and the user's stated intent → say which one you picked and
   keep going.
@@ -29,6 +29,11 @@ Call `rendemo_list_projects`. Each project reports `demo: { id, status }` or `nu
   world-visible at a public URL. That is not yours to decide. Offer it, wait for a yes.
 - `demo: null` → the project has no demo yet. Publishing is the only path, so the same checkpoint
   applies.
+- `protected: true` → **stop before writing anything.** A password-protected demo cannot be embedded
+  at all: the access cookie is dropped inside a third-party iframe, so the visitor loops back to the
+  password form forever. This is not a caveat to mention afterwards — it makes the whole install
+  pointless, and the files you would write are files that can never work. Offer the alternatives
+  instead: link to `/d/<id>` or `/site/<workspace>/<slug>` in a new tab, or remove the password.
 
 ## 2. Detect the framework — do not ask, look
 
@@ -104,10 +109,9 @@ things, say that it belongs in `embed.js` and does not go in the wrapper.
 - **CSP.** If the host page sets a strict `script-src`, it must allow `https://www.rendemo.com` or
   the element never upgrades and its fallback link renders instead of the demo. Grep for a CSP in
   middleware / headers config and say plainly whether you found one.
-- **Password-protected demos cannot be embedded today.** The access cookie is dropped inside a
-  third-party iframe, so the visitor loops back to the password form forever. Link to `/d/<id>` or
-  `/site/<workspace>/<slug>` in a new tab instead. If the demo is protected, say this before writing
-  anything.
+- **Password protection was already handled in step 1** — `protected: true` stops the install before
+  any file is written, because an embedded protected demo can never work. If you reached this section
+  with files written, step 1 was skipped.
 - **`mode="tour"` is not this skill's job.** It is a real, working mode — but it renders a *tour*,
   anchored to `data-rendemo` markers in the host's own source, with no iframe and no footage. It has
   its own procedure (`author-a-tour`) with approval gates, because it writes into the customer's

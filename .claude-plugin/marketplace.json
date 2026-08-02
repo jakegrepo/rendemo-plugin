@@ -1,7 +1,7 @@
 {
   "name": "rendemo",
-  "description": "The Rendemo plugin: embed a published demo, or author a product tour anchored to markers in your own source.",
-  "repository": "https://github.com/jakegrepo/rendemo-plugin",
+  "description": "Embed a published demo or author a marker-anchored tour with Rendemo's complete step-card systems.",
+  "repository": "https://github.com/jakegrepo/rendemo",
   "owner": {
     "name": "Rendemo",
     "url": "https://www.rendemo.com"
@@ -10,7 +10,7 @@
     {
       "name": "rendemo",
       "source": "./",
-      "description": "Install a published Rendemo demo on a website, and author product tours anchored to data-rendemo markers in your own source.",
+      "description": "Install published demos and author product tours with Rendemo's seven composition-led step-card systems.",
       "homepage": "https://www.rendemo.com"
     }
   ]

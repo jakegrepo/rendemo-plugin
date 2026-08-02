@@ -7,13 +7,19 @@ Invoke the `rendemo:author-a-tour` skill and follow it end to end.
 
 The user's intent: $ARGUMENTS
 
+**Never narrate the machinery.** No "handing off to the tour skill", no "I'll follow this skill end to
+end", no "first, let me check whether a matching tour exists", no explaining which word in their
+request routed them here. That is this plugin describing its own organisation to someone who asked for
+a tour. Say what you *found* and what you are *doing* — never which file you are in or which step of a
+procedure you have reached.
+
 ## First: does this tour already exist?
 
 **Call `rendemo_list_tours` before anything else.** This command covers both visits — building a tour
 and changing one — because from the user's side they are the same sentence. "Onboarding for new users"
 is what someone types whether or not a tour by that name exists, and a separate edit command would
 make them know which state they are in before they could name the command, which is exactly the
-knowledge this plugin exists to remove. `/rendemo` already routes on watching versus doing; routing
+knowledge this plugin exists to remove. `/rendemo:start` already routes on watching versus doing; routing
 again on new versus existing would be a second quiz for no gain.
 
 - **No tour matches the intent** → this is authoring. Continue below.
@@ -21,9 +27,9 @@ again on new versus existing would be a second quiz for no gain.
   whether they want to change that one or start a new one. Do not assume; "add onboarding for new
   users" from someone who already has an `onboarding` tour is genuinely ambiguous.
 - **They clearly mean an existing one** ("drop the billing step", "reword step 3", "put the invite
-  step before the project step") → skip the authoring preamble entirely and go to **Editing an
-  existing tour** in the skill. Do not re-state the whole absent-features list at someone who already
-  shipped a tour; name only what their change touches.
+  step before the project step") → go straight to **Editing an existing tour** in the skill. Name only
+  the constraints their specific change touches — someone who already shipped a tour is the last
+  person who needs the general shape of tours explained to them.
 
 ## Editing an existing tour
 
@@ -43,34 +49,34 @@ The skill has the full procedure. What must not be improvised:
 
 ## Authoring a new tour
 
-**Before anything else, in your first reply:** state what this produces and what it does not.
+**Do not open with a disclosure essay, and do not ask permission to read the repo.** Someone who typed
+"build a tour of our app" has already decided. Reading their code is free, reversible and invisible —
+gating it behind "say go" buys them nothing and costs them a round trip. The first act that is not free
+is **writing markers into their source**, and that is where the one gate belongs.
 
-It produces a tour that really runs in their product: markers in source, a published tour, an offline
-CI check that fails when a step's target element is deleted, and one
-`<rendemo-demo demo="…" mode="tour">` element that anchors each step to the live DOM, advances when the
-user does the real thing, reports its funnel to Rendemo's analytics, and can branch where the author
-declared a choice. Optional attributes: `user` (per-person progress), `routes` (which pages it may run
-on), `when="always"` (a replayable "Take the tour").
+So the first reply is a clause of readiness, a clause of what you are doing, then work:
 
-It does **not** produce a targeting rule engine — no "new users only", no per-plan or per-role
-condition; **conditional rendering of the element is the primitive**, and `routes` filters pages, not
-people. Progress is still `localStorage`, so `user` makes it per person within a browser and **not**
-across devices. The analytics observe **Do-Not-Track and nothing else** — there is no consent API in
-that path. Branches are viewer-chosen, never rule-evaluated, and a step whose target never appears
-still gives up visibly rather than taking another path. The kill switch (per demo, and per workspace)
-stops it being **served** within 30 seconds; it does not reach into a tab where the tour is already
-running.
+> Signed in to **acme**. Reading the repo for the signup → first-project sequence…
 
-Say all of that — both halves — then get an explicit go-ahead before scanning the repo or writing
-anything.
+The single thing worth saying before you scan — because it is the only one that can make this whole
+approach wrong for them — is that a tour writes `data-rendemo` attributes into their source and **those
+have to ship to production**. Someone who cannot change the product's code cannot have a tour. Say it
+in a clause; if they can change their code, it needs no answer and you keep going.
+
+**Every other limit is disclosed where it bites, not up front.** The skill has the table: targeting and
+cross-device progress when you hand over the element, analytics before publishing, branching only if
+they want a fork, the kill switch when they ask how to stop it. Front-loading all five means the user
+pays the full cost on every tour and retains none of it — they cannot judge "no rule engine" before
+they have seen a single step.
 
 If the user wants something a visitor **watches** rather than performs for real, that is a published
-replay demo installed with `<rendemo-demo>` — point them at `/rendemo-demo` instead. If you are not
-sure which they meant, `/rendemo` settles it in one question.
+replay demo installed with `<rendemo-demo>` — point them at `/rendemo:demo` instead. If you are not
+sure which they meant, `/rendemo:start` settles it in one question.
 
-Then: read the repo to find the sequence the intent describes, propose the steps as a table with a
-`file:line` for every target element, and get approval before creating the tour or writing a single
-marker.
+Then: read the repo to find the sequence the intent describes and **propose the steps as a table with a
+`file:line` for every target element.** That table is the real disclosure — specific, about their own
+product, and something they can actually judge. Get approval on it before creating the tour or writing
+a single marker.
 
 **Offer the CI step too.** You are already writing files into their repo; the check is only a safety
 net once it runs on every push. The skill has the detection table — GitHub Actions, GitLab, CircleCI

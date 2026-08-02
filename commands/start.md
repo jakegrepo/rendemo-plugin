@@ -17,13 +17,20 @@ npx --yes rendemo doctor
 ```
 
 It prints a six-line block: sign-in, workspace, tours, MCP server, MCP headers, version. It touches
-nothing and publishes nothing. The **MCP headers** line runs the plugin's `headersHelper` command
-(`npx --yes rendemo token`) to prove the MCP server can actually reach the stored token, so it can take
-a few seconds on a machine with a cold npx cache.
+nothing and publishes nothing. The **MCP headers** line runs whichever `headersHelper` is actually
+declared — the plugin's shipped `bin/mcp-token.mjs`, or the `npx --yes rendemo token` form a repo's own
+`.mcp.json` carries — to prove the MCP server can reach the stored token. The plugin's takes about a
+tenth of a second; the `npx` form can take several, and doctor warns when it takes enough of the
+ten-second budget to be a coin flip rather than a cost.
 
-**Then say ONE line about readiness before you ask anything else**, e.g. *"Signed in to Acme, tours
-check out — which of these did you mean?"* or *"You are not signed in yet; `npx rendemo login` fixes
-that in about twenty seconds."* One line. Do not paste the whole block unless something failed.
+**Do not announce that you are running it.** "I'll start with the readiness check" is a sentence about
+your own procedure, and it arrives before the user has been told anything. Run it silently and let the
+result be the first thing they read.
+
+**Then fold readiness into ONE clause of the line you were going to say anyway** — never its own
+sentence, never its own turn: *"Signed in to Acme — which of these did you mean?"* or *"You are not
+signed in yet; `npx rendemo login` fixes that in about twenty seconds."* Do not paste the whole block
+unless something failed, and when everything passes do not list what passed.
 
 How to read it:
 
@@ -37,7 +44,7 @@ How to read it:
 - **`? Workspace`** — unreachable. That is a network problem, **not** a bad token. Do not tell them to
   re-authenticate.
 - **`✗ Tours`** — this repo already has a tour whose steps no longer resolve. Worth naming up front:
-  it usually means someone deleted or moved a marked element, and `/rendemo-tour` can repair it.
+  it usually means someone deleted or moved a marked element, and `/rendemo:tour` can repair it.
 - **`✗ MCP headers`** — the token is stored and valid, but the command the MCP server uses to *read* it
   cannot run, and `RENDEMO_API_TOKEN` is not set either. So every tool call will 401 even though the
   sign-in looks fine. This is a blocker exactly like `✗ Sign-in`: stop and relay what the line says. It
@@ -67,8 +74,11 @@ signed up; a tour goes inside the app for someone who has.
 
 ## Route it
 
-**If `$ARGUMENTS` already makes the intent obvious, do not run a quiz.** Say which one you picked and
-the word in their request that decided it, then go.
+**If `$ARGUMENTS` already makes the intent obvious, do not run a quiz — and do not show your
+reasoning.** Pick, and go. *"You said 'tour' and 'in the app', so this is a tour; handing off to the
+tour skill"* is three clauses of thinking out loud, and the user learns which one you picked by
+watching you do it. Name the choice in a few words only when it is genuinely close, or when picking
+wrong would waste their time.
 
 Signals for a **demo**: "on our pricing page", "on the site", "landing page", "watch", "video",
 "already recorded", "share with a prospect", a named published demo.
@@ -78,9 +88,9 @@ Signals for a **tour**: "in the app", "our users", "onboarding", "walk them thro
 
 Then:
 
-- **Demo** → run `/rendemo-demo` with their intent, or invoke the `rendemo:embed-a-demo` skill
+- **Demo** → run `/rendemo:demo` with their intent, or invoke the `rendemo:embed-a-demo` skill
   directly and follow it end to end.
-- **Tour** → run `/rendemo-tour` with their intent, or invoke the `rendemo:author-a-tour` skill
+- **Tour** → run `/rendemo:tour` with their intent, or invoke the `rendemo:author-a-tour` skill
   directly and follow it end to end.
 
 **If the intent is genuinely ambiguous, or `$ARGUMENTS` is empty, ask one question — not a
