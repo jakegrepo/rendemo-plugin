@@ -1,7 +1,7 @@
 ---
 name: author-a-tour
-description: This skill should be used when the user asks to "add a product tour", "build a guided tour of our app", "onboard new users in the app", "create a tour", or to CHANGE an existing one — "add a step to the onboarding tour", "reword step 3", "reorder the tour", "drop the billing step", "take the tour down" — or mentions `data-rendemo`, `rendemo.tours.json`, `rendemo_create_tour`, `rendemo_add_tour_step`, `rendemo_list_tours`, `rendemo_remove_tour_step`, `rendemo_get_tour_preview`, or wants step-by-step guidance on their own real product rather than a recorded demo. Covers both visits: authoring a tour (find the sequence, get approval, write markers, preview, publish, commit the lockfile, verify) and editing one (add, reword, reorder, remove a step and its marker together, retire the whole tour cleanly).
-version: 0.7.0
+description: This skill should be used when the user asks to "add a product tour", "build a guided tour of our app", "onboard new users in the app", "create a tour", or to CHANGE an existing one — "add a step to the onboarding tour", "reword step 3", "reorder the tour", "drop the billing step", "take the tour down" — or mentions `data-rendemo`, `rendemo.tours.json`, `rendemo_create_tour`, `rendemo_add_tour_step`, `rendemo_list_tours`, `rendemo_remove_tour_step`, `rendemo_get_tour_preview`, `rendemo_probe_tour_targets`, or wants step-by-step guidance on their own real product rather than a recorded demo. Covers both visits: authoring a tour (find the sequence, get approval, write markers, preview, publish, commit the lockfile, verify) and editing one (add, reword, reorder, remove a step and its marker together, retire the whole tour cleanly).
+version: 0.8.0
 ---
 
 # Author a Rendemo product tour
@@ -29,6 +29,24 @@ list is not.
 
 So the first reply is: one clause of readiness, one clause of what you are about to do, then work.
 
+**Write it from this template rather than composing it fresh.** Prohibitions do not survive contact
+with a first turn — "do not narrate the machinery" has been stated twice and still produced *"I'll
+start by checking what tours already exist here"*, which is a sentence about your own procedure that
+tells the user nothing. A shape is harder to drift from than a rule:
+
+> Signed in to **{workspace}**. Reading the repo for the {intent} sequence…
+
+and, when the request names an audience, one clause more:
+
+> Signed in to **{workspace}**. Worth knowing up front: who sees a tour is a conditional render in
+> your own code — Rendemo has no rule engine — so "{their audience}" becomes your app rendering the
+> element only when {condition}. Reading the repo for the {intent} sequence…
+
+What is banned is naming your own apparatus: which skill or file you are in, which step of a
+procedure you have reached, that you are "checking first", that you are about to hand off. Say what
+you **found** and what you are **doing**. `rendemo_list_tours` still runs first — it is just not
+something the user hears about unless it changed the answer.
+
 ## What a tour is — reference, not a script to read aloud
 
 It runs in the product through one element:
@@ -49,7 +67,7 @@ becomes a sentence that changes a decision they are actually making, at a specif
 
 | Limit | Say it at |
 | --- | --- |
-| No targeting rule engine — conditional rendering is the primitive; `routes` filters pages, not people | §10, handing over the element |
+| No targeting rule engine — conditional rendering is the primitive; `routes` filters pages, not people | §10 — **unless the request names an audience, and then the first reply** (see below) |
 | Progress is `localStorage` — `user` scopes it per browser, never syncs across devices | §10, with the `user` attribute |
 | Analytics observe Do-Not-Track and nothing else — no consent API | §7, before publishing |
 | Branches are viewer-chosen, never rule-evaluated | §5, and only if they want a fork |
@@ -58,6 +76,28 @@ becomes a sentence that changes a decision they are actually making, at a specif
 Most of these are already written into those sections. Reaching them early buys nothing: the user
 cannot evaluate "no rule engine" before they have seen a step table, and by the time it matters they
 will have forgotten you said it.
+
+**The one exception, and it is not rare — it is most onboarding tours.** Deferring the targeting
+limit is right for "show me around the app" and wrong for "show this to users who don't have a
+recording yet". When the request *names an audience* — anything of the shape "users who…", "trial
+accounts", "admins", "first-time visitors", "people who haven't done X" — the limit is not a
+footnote about the element, it is a fact about **the thing they just asked for**, and disclosing it
+at §10 means they learn at the end that the headline requirement was never Rendemo's to satisfy.
+
+So: if the request names an audience, the first reply says, in one clause, that **who sees a tour is
+a conditional render in their own code** — Rendemo has no rule engine and cannot know their users —
+and then names the specific condition you will be asking them to write, e.g. "so this becomes: your
+app renders the element only when the recording count is zero." Then keep going and scan the repo.
+It costs one sentence and it is the difference between a constraint and a surprise.
+
+Two things follow from it that must not be improvised:
+
+- **That conditional is host code, and it is nobody's to check.** `rendemo check` does not see it,
+  the lockfile does not describe it, the kill switch does not reach it, and if it regresses the tour
+  shows to everyone or to no one with nothing reporting it. Say that once, when you hand the gate
+  over — not as a disclaimer, as the reason it belongs in their code review.
+- **Do not write it silently.** If the gate needs a component, propose it in the step table alongside
+  the markers so it is approved as part of the same change, not slipped in.
 
 The detail behind each, for when its moment arrives:
 
@@ -227,9 +267,24 @@ Rules for the proposal:
   that `check` cannot give you:
   1. *How many of these are in the DOM at once?* One line of source inside a `.map()` is N elements at
      runtime, and the tour treats an ambiguous marker as a **missing** target. That step needs `match`
-     (`"first"`, `"last"`, or a 1-based integer). Two mutually exclusive JSX branches carrying the same
-     marker are the mirror image: two occurrences in source, one at runtime, and `check` *will* fail
-     them with `duplicate-marker` until you add `match: "first"`.
+     (`"first"`, `"last"`, or a 1-based integer).
+
+     **The precedence, because it decides the commonest case and reads backwards if you guess:
+     resolution filters to the elements the visitor can SEE, and only then applies `match`.** So
+     `match` disambiguates among visible elements — a hidden duplicate never shifts what `"last"` or
+     `nth: 2` means, and a copy in a closed drawer does not make an unmatched marker ambiguous.
+
+     Which settles the **responsive** case, and settles it the opposite way to intuition: a control
+     rendered twice for two breakpoints — a `hidden md:flex` sidebar and a phone nav — **can and
+     should carry the same marker on both.** One is on screen at a time, so the viewport does the
+     disambiguating. Give that step `match: "visible"`: at runtime it behaves exactly as no `match`
+     does (which is already correct), and it is what tells the offline `check` that two occurrences
+     in source are deliberate rather than a mistake. Do **not** reach for `"first"` here — it passes
+     the check too, but it says source order decides when the viewport does, and it silently pins the
+     step to whichever branch the bundler happened to emit first.
+
+     Never conclude that a tour must be desktop-only because a nav is duplicated. That is a solved
+     shape, and dropping the nav steps costs the user a tour on every phone for no reason.
   2. *Is it visible when the step is reached?* Resolution **prefers a visible match**: among several
      elements carrying the marker it picks the one on screen, and if the only match is invisible it
      treats the step as not-yet-present and keeps waiting, then gives up visibly on timeout. So a tab
@@ -245,6 +300,52 @@ Rules for the proposal:
   toolbar popovers: a single `marker` prop spread onto the trigger button, not a `...rest`). Never wrap
   the element in a new `<div>` to hang the attribute on — that injects a layout box into their CSS,
   which is the whole reason `demo()` is an attribute spread and not a component.
+
+### Ask the open decisions ONE AT A TIME. "Go" is not an answer to four questions.
+
+A step table almost always surfaces decisions the scan cannot settle: a nav that only exists on
+desktop, a shared component that needs a prop to carry a marker, a CI assertion that will go red, a
+gate component to restore. It is tempting to write those up as prose and end with "say go" — and what
+comes back is `go`, which answers none of them. You then pick defaults for all four, and the user has
+made a decision they did not know they were making. That is the single most common way this procedure
+ships something the user would have chosen differently.
+
+So:
+
+- **The step table gets one approval.** That is the gate on writing markers, and a yes/no fits it.
+- **Every open decision is asked as its own question, with the options named.** If the harness offers
+  a structured choice, use it — one round trip, four answers. If it does not, number them and ask for
+  numbered answers.
+- **Never bundle a configuration question into the approval.** "Say go — and where does your app
+  run?" invites a one-word reply that loses the second half.
+- **If a decision comes back unanswered, say which default you took and why, in the same breath as
+  the work.** A default chosen aloud can be corrected; a default chosen silently cannot.
+
+### Find out where the app runs — and that it ANSWERS — before you write a marker
+
+`baseUrl` is asked for at preview time, which is far too late to discover that nothing is serving it.
+The preview is the first moment anything in this procedure needs a running app, and by then you have
+written attributes into their source, created a tour, and started a 30-minute clock.
+
+So ask where their app runs as part of the same round trip as the step table, and **confirm something
+answers there** before writing markers — a single request is enough. If nothing does, say so and let
+them start it. Getting a dev server up can be its own small ordeal (an empty `node_modules` in a
+worktree, a build that needs a real install), and it is much cheaper to hit that before the source
+edits than between the markers and the preview.
+
+If they cannot run the app anywhere yet, that is fine — say plainly that the tour will be authored
+blind and cannot be previewed until it runs, and let them decide whether to continue.
+
+### If you are about to restore something that was deliberately deleted, ask first
+
+Markers, pass-through props and mount components are sometimes *removed on purpose* — a cleanup, a
+rollback, a decision the user made last week and has not forgotten. Reading them back out of git and
+re-creating them is not a neutral act, and "it was deleted in b503c91" is a fact you already have
+from the scan.
+
+Before restoring anything the history shows was deliberately removed, name the commit and ask whether
+it should come back. One sentence. If they say yes it costs nothing; if they say no you have avoided
+quietly reverting their own decision.
 
 Then stop and wait. **Writing markers modifies the customer's source**, and the tour slug you agree on
 is baked into every one of those attributes — renaming it later orphans all of them.
@@ -346,6 +447,35 @@ that says why it matters beats a label. `successMessage` is what the viewer sees
 right; `recoveryHint` is the only thing they get when the step gives up, so it must name where the
 control actually is.
 
+## 5b. Probe the targets — before the preview link exists
+
+```
+rendemo_probe_tour_targets({ projectId, baseUrl })
+```
+
+It fetches each step's route from the running app and reports, per step, whether the tour would find
+its marker there. Run it **before** minting a preview link, every time. It costs seconds, spends none
+of the link's thirty minutes, and it catches the three failures that otherwise consume a person's
+review:
+
+- markers not deployed to the host you are about to point them at,
+- a route that renders a sign-in stub, so the step's element is not there at all,
+- a marker resolving to several elements with no `match`, which never anchors.
+
+**Read `absent` correctly, and say it correctly.** The probe sees the HTML the server sends a
+signed-out stranger. A marker rendered after sign-in, or only on the client after hydration, is
+genuinely missing from that response and genuinely present for the real visitor. `absent` therefore
+means *look here*, not *broken*.
+
+That distinction is the whole value, so pass it on rather than swallowing it: when you hand over the
+preview link, **name the steps the reviewer must be signed in to see.** A reviewer who walks ten
+steps and finds six reporting a missing target, with no warning, reports six bugs — and every one of
+them costs a round trip to explain away. Told first, they sign in and review ten steps once.
+
+If a step is `absent` for a reason that is *not* auth or hydration, fix it before previewing. A
+preview is for judging copy and anchoring; it is not the place to discover the markers are not
+deployed.
+
 ## 6. Preview the draft — before you offer to publish
 
 **This step comes before publishing, and that ordering is the point.** Publishing used to be the only
@@ -366,8 +496,14 @@ is never mistaken for the live thing.
 - **Ask where their app runs.** `baseUrl` defaults to `http://localhost:3000`; a link pointed at the
   wrong host looks exactly like a broken tour. A dev server, a staging deploy and production are all
   valid targets.
-- **The link is a bearer token and expires 30 minutes after it is issued.** Anyone holding it sees the
-  draft, with no sign-in. Say that when you hand it over, and re-issue rather than trying to extend one.
+- **The link is a bearer token and expires 30 minutes after it is ISSUED — not after it is first
+  opened.** Anyone holding it sees the draft, with no sign-in. Two consequences, and the first is the
+  one that actually bites: **mint it at the moment the reviewer is ready to look.** Issuing it and
+  then running an install, a build, or a deploy spends the window on work the reviewer never sees, and
+  they get a link that dies mid-review. Do the probe, get the app running, get yourself to the point
+  where the only thing left is a person looking — *then* call this. Second: say the bearer property
+  when you hand it over, and re-issue rather than trying to extend one. Re-issuing is free and
+  instant; if it lapses while they are reviewing, just mint another.
 - **A tour that has never been published previews fine.** That is the case preview matters most for —
   you cannot inspect the first version of a tour by publishing it.
 - The tool refuses if no step has a route yet: there would be no page to open. Add the steps first.
@@ -472,11 +608,34 @@ Failures name what to do:
   The inverse has no failure to name it: a marker inside a `.map()` is one occurrence in source, so
   check passes and the tour then finds several elements and gives up. Only step 2's first question
   catches that.
-- `orphan-marker` — a marker in source that no step references. Delete it or add the step.
+- `orphan-marker` — a marker in source that no step references. Delete it or add the step. **If you
+  find orphans you did not create, do not just mention them.** Reporting "there are six orphan markers
+  under `sample-waypoint`, pre-existing, not something I touched" hands someone a problem and no
+  handle. Say what they are, then offer the one command that clears them —
+  `npx rendemo remove sample-waypoint --dry-run` — and let them decide. It is their repo and their
+  call, but the difference between a finding and a fix is one sentence.
 - **An unknown-tour warning on a *passing* run** — source has markers for a tour this lockfile does not
   describe, so nothing about that tour is being checked. Regenerate the lockfile, passing the current
   one, unless another team owns those markers. (The CLI still prints this one warning under its
   pre-rename code name and wording. It is the same check, not a different one.)
+
+**The blind spot this check has, which `rendemo_list_tours` can see and the check cannot:** a tour
+that is *published* but absent from the lockfile is invisible here. The check only verifies what the
+lockfile describes, so a published tour whose markers were stripped from source passes silently —
+green CI, and a live tour anchored to nothing. If §0's listing showed a published tour that the
+lockfile does not mention, say so; it is a real broken state and nothing else will report it.
+
+### Do not leave the repo knowingly red
+
+If your change breaks something in this repo — a CI assertion that counts steps or tours, a snapshot,
+a fixture — **fix it in the same change.** Flagging it twice and fixing it zero times leaves a branch
+that fails its own check, and "I'll update that line after you publish" is a promise the user now has
+to remember for you.
+
+When a fix genuinely cannot land yet because it depends on an output that does not exist until after
+publish (a lockfile, a plan hash), say exactly that, name the file and line, and **come back to it in
+the same session** once the dependency exists. Ending the session with it still red is not an option;
+if you must, the final report has to lead with it, not bury it.
 
 The check **prints** each tour's `planHash` and cannot verify it — it is offline, so it has no way to
 ask whether that is still the published plan. Treat the printed hash as something a human can diff.
@@ -642,6 +801,18 @@ about kill switches; that belongs in "Retiring a tour", where someone who actual
 State: the tour slug, the steps and their markers, that the user saw the preview and approved it, that
 it is published, that the lockfile is committed, whether the check actually ran and its exit code, and
 whether the element is installed or still needs to be.
+
+Three more, each of which is a thing the user would otherwise discover later:
+
+- **Anything still red or still owed.** A CI assertion you had to defer, a step you could not resolve,
+  a decision you defaulted because it came back unanswered. Lead with it. A report that reads as
+  finished while the branch fails its own check is the one failure mode that costs trust rather than
+  time.
+- **The gate, if the tour is audience-scoped.** Name the component and the condition, and say once
+  that it is host code no Rendemo surface checks — not to hedge, but because it is the line in the
+  change that needs a human reviewer.
+- **Which steps the reviewer had to be signed in to see**, if the probe found any. It explains the
+  preview they just walked and stops the same question next time.
 
 **Do not replay all five limits here.** Each was said at the moment it mattered, and a closing recital
 of things already disclosed is the same wall of text moved to the end — it reads as hedging a tour you
