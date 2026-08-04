@@ -17,7 +17,12 @@ This file is generated from `shared/presentations/registry.ts`, the same authori
 
 | ID | Recipe | Roles | Materials | Motion | Targets | Copy budget H/B | Max occlusion |
 |---|---|---|---|---|---|---:|---:|
-| `beacon` | Beacon | `act` | `precision`, `glass`, `luminous`, `brand-minimal` | `trace`, `focus`, `pulse`, `still` | `direct-tether`, `target-orbit` | 48/96 | 25% |
+| `anchor-tooltip` | Anchor Tooltip | `act` | `precision`, `brand-minimal`, `glass` | `focus`, `still`, `trace` | `direct-tether` | 44/96 | 22% |
+| `pulse-note` | Pulse Note | `act`, `inspect` | `brand-minimal`, `precision`, `glass` | `pulse`, `still`, `focus` | `target-orbit`, `direct-tether` | 38/72 | 12% |
+| `floating-callout` | Floating Callout | `explain`, `inspect` | `precision`, `paper`, `brand-minimal`, `glass` | `focus`, `still`, `draw` | `edge-connector`, `none`, `framing-corners` | 56/150 | 25% |
+| `text-modal` | Text Modal | `explain`, `transition`, `close` | `precision`, `glass`, `brand-minimal`, `paper` | `focus`, `assemble`, `still` | `none`, `spatial-reframe` | 68/180 | 35% |
+| `media-modal` | Media Modal | `transition`, `close`, `explain` | `glass`, `obsidian`, `brand-minimal`, `soft-spatial` | `assemble`, `focus`, `still` | `none`, `spatial-reframe` | 72/180 | 35% |
+| `beacon` | Guided Tooltip | `act` | `precision`, `glass`, `luminous`, `brand-minimal` | `trace`, `focus`, `pulse`, `still` | `direct-tether`, `target-orbit` | 48/96 | 25% |
 | `magnifier` | Magnifier | `inspect`, `act` | `glass`, `precision`, `soft-spatial`, `luminous` | `focus`, `morph`, `assemble`, `still` | `magnified-lens`, `target-orbit` | 52/118 | 25% |
 | `margin-note` | Margin Note | `explain`, `inspect` | `editorial`, `paper`, `brand-minimal`, `precision` | `draw`, `sweep`, `still` | `edge-connector`, `framing-corners` | 64/190 | 25% |
 | `action-dock` | Action Dock | `act`, `complete` | `precision`, `glass`, `obsidian`, `brand-minimal` | `sweep`, `trace`, `assemble`, `still` | `edge-connector`, `spatial-reframe` | 52/112 | 18% |
