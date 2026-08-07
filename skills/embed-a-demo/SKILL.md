@@ -1,6 +1,6 @@
 ---
 name: embed-a-demo
-description: This skill should be used when the user asks to "embed a demo", "add our demo to the pricing page", "install a Rendemo demo", "put the product demo on the site", mentions `<rendemo-demo>`, `embed.js`, or `rendemo_get_embed`, or wants an interactive Rendemo demo rendered inside their own app or marketing site. Sequences the whole install: pick the demo, detect the framework, write the wrapper, place the script tag.
+description: 'This skill should be used when the user asks to "embed a demo", "add our demo to the pricing page", "install a Rendemo demo", "put the product demo on the site", mentions `<rendemo-demo>`, `embed.js`, or `rendemo_get_embed`, or wants an interactive Rendemo demo rendered inside their own app or marketing site. Sequences the whole install: pick the demo, detect the framework, write the wrapper, place the script tag.'
 version: 0.3.0
 ---
 
