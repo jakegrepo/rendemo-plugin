@@ -8,7 +8,7 @@ This file is generated from `shared/presentations/registry.ts`, the same authori
 - Materials: `precision`, `editorial`, `glass`, `obsidian`, `paper`, `luminous`, `soft-spatial`, `brand-minimal`
 - Motion signatures: `trace`, `sweep`, `draw`, `focus`, `morph`, `assemble`, `pulse`, `still`
 - Typography: families `brand`, `sans`, `serif`, `mono`; title 16-84px; body 12-24px; weights `500`, `600`, `700`, `800`; alignment `left`, `center`, `right`; safe hex colors for title, body, and eyebrow
-- Direct text editing: select and type on the rendered card; independently style `eyebrow`, `headline`, `body`, `instruction`, `targetLabel`, `status`, `result`, `metricValue`, `metricLabel`, `quote`, `primaryAction`, `secondaryAction`, `replayAction`, `successLabel`, `journeyCompletedLabel`, `journeyUpcomingLabel` with families `brand`, `sans`, `serif`, `mono`, 10-96px sizes, weights `400`, `500`, `600`, `700`, `800`, alignment, safe hex colors, italic, and underline
+- Direct text editing: select and type on the rendered card; independently style `eyebrow`, `headline`, `body`, `instruction`, `targetLabel`, `status`, `result`, `metricValue`, `metricLabel`, `quote`, `primaryAction`, `secondaryAction`, `replayAction`, `successLabel` with families `brand`, `sans`, `serif`, `mono`, 10-96px sizes, weights `400`, `500`, `600`, `700`, `800`, alignment, safe hex colors, italic, and underline
 - Card borders: treatments `none`, `line`, `gradient`, `glow`; motion `still`, `trace`, `sweep`, `orbit`, `pulse`, `march`; 1-6px width; 0-40px radius; speed `slow`, `normal`, `fast`; direction `clockwise`, `counterclockwise`; two safe hex colors; reduced motion resolves to a finished still border
 - Target beam: demo-wide opt-in card-to-target connector; default `false`
 - Target relationships: `direct-tether`, `edge-connector`, `target-orbit`, `magnified-lens`, `framing-corners`, `spatial-reframe`, `none`
@@ -18,20 +18,12 @@ This file is generated from `shared/presentations/registry.ts`, the same authori
 | ID | Recipe | Roles | Materials | Motion | Targets | Copy budget H/B | Max occlusion |
 |---|---|---|---|---|---|---:|---:|
 | `anchor-tooltip` | Anchor Tooltip | `act` | `precision`, `brand-minimal`, `glass` | `focus`, `still`, `trace` | `direct-tether` | 44/96 | 22% |
-| `pulse-note` | Pulse Note | `act`, `inspect` | `brand-minimal`, `precision`, `glass` | `pulse`, `still`, `focus` | `target-orbit`, `direct-tether` | 38/72 | 12% |
-| `floating-callout` | Floating Callout | `explain`, `inspect` | `precision`, `paper`, `brand-minimal`, `glass` | `focus`, `still`, `draw` | `edge-connector`, `none`, `framing-corners` | 56/150 | 25% |
-| `text-modal` | Text Modal | `explain`, `transition`, `close` | `precision`, `glass`, `brand-minimal`, `paper` | `focus`, `assemble`, `still` | `none`, `spatial-reframe` | 68/180 | 35% |
+| `pulse-note` | Pulse Note | `act` | `brand-minimal`, `precision`, `glass` | `pulse`, `still`, `focus` | `target-orbit`, `direct-tether` | 38/72 | 12% |
+| `floating-callout` | Floating Callout | `explain` | `precision`, `paper`, `brand-minimal`, `glass` | `focus`, `still`, `draw` | `edge-connector`, `none`, `framing-corners` | 56/150 | 25% |
+| `text-modal` | Text Modal | `act`, `explain`, `transition`, `close` | `precision`, `glass`, `brand-minimal`, `paper` | `focus`, `assemble`, `still` | `none`, `spatial-reframe` | 68/180 | 35% |
 | `media-modal` | Media Modal | `transition`, `close`, `explain` | `glass`, `obsidian`, `brand-minimal`, `soft-spatial` | `assemble`, `focus`, `still` | `none`, `spatial-reframe` | 72/180 | 35% |
-| `beacon` | Guided Tooltip | `act` | `precision`, `glass`, `luminous`, `brand-minimal` | `trace`, `focus`, `pulse`, `still` | `direct-tether`, `target-orbit` | 48/96 | 25% |
-| `magnifier` | Magnifier | `inspect`, `act` | `glass`, `precision`, `soft-spatial`, `luminous` | `focus`, `morph`, `assemble`, `still` | `magnified-lens`, `target-orbit` | 52/118 | 25% |
-| `margin-note` | Margin Note | `explain`, `inspect` | `editorial`, `paper`, `brand-minimal`, `precision` | `draw`, `sweep`, `still` | `edge-connector`, `framing-corners` | 64/190 | 25% |
-| `action-dock` | Action Dock | `act`, `complete` | `precision`, `glass`, `obsidian`, `brand-minimal` | `sweep`, `trace`, `assemble`, `still` | `edge-connector`, `spatial-reframe` | 52/112 | 18% |
-| `flowline` | Flowline | `act`, `navigate` | `glass`, `obsidian`, `precision`, `brand-minimal` | `sweep`, `trace`, `pulse`, `still` | `edge-connector`, `direct-tether` | 46/84 | 18% |
-| `spotlight` | Spotlight | `explain`, `transition`, `prove` | `obsidian`, `luminous`, `soft-spatial`, `brand-minimal` | `focus`, `assemble`, `sweep`, `still` | `framing-corners`, `spatial-reframe`, `none` | 72/170 | 35% |
-| `control-room` | Control Room | `operate`, `act` | `obsidian`, `precision`, `glass`, `luminous` | `trace`, `assemble`, `morph`, `still` | `direct-tether`, `edge-connector`, `target-orbit`, `framing-corners` | 58/160 | 30% |
 | `decision-canvas` | Decision Canvas | `decide` | `precision`, `editorial`, `glass`, `obsidian`, `paper`, `luminous`, `soft-spatial`, `brand-minimal` | `morph`, `assemble`, `sweep`, `still` | `spatial-reframe`, `none` | 68/130 | 30% |
-| `proof-stack` | Proof Stack | `prove`, `complete` | `paper`, `editorial`, `glass`, `obsidian`, `brand-minimal` | `assemble`, `draw`, `morph`, `still` | `framing-corners`, `spatial-reframe`, `none` | 72/165 | 34% |
-| `journey-map` | Journey Map | `navigate`, `operate` | `precision`, `paper`, `glass`, `brand-minimal` | `draw`, `sweep`, `assemble`, `still` | `spatial-reframe`, `edge-connector` | 58/128 | 32% |
+| `proof-stack` | Proof Stack | `prove` | `paper`, `editorial`, `glass`, `obsidian`, `brand-minimal` | `assemble`, `draw`, `morph`, `still` | `framing-corners`, `spatial-reframe`, `none` | 72/165 | 34% |
 | `scene-break` | Scene Break | `transition` | `precision`, `editorial`, `glass`, `obsidian`, `paper`, `luminous`, `soft-spatial`, `brand-minimal` | `trace`, `sweep`, `draw`, `focus`, `morph`, `assemble`, `still` | `none`, `spatial-reframe` | 84/180 | 100% |
 | `outcome-stage` | Outcome Stage | `close` | `precision`, `editorial`, `glass`, `obsidian`, `paper`, `luminous`, `soft-spatial`, `brand-minimal` | `trace`, `sweep`, `morph`, `assemble`, `still` | `none` | 86/185 | 100% |
 
