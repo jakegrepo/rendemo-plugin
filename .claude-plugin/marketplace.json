@@ -1,7 +1,7 @@
 {
   "name": "rendemo",
   "description": "Embed a published demo or author a marker-anchored tour with Rendemo's complete step-card systems.",
-  "repository": "https://github.com/jakegrepo/rendemo",
+  "repository": "https://github.com/jakegrepo/rendemo-plugin",
   "owner": {
     "name": "Rendemo",
     "url": "https://www.rendemo.com"

@@ -129,19 +129,41 @@ the target.
 
 ## Install
 
-`plugin/` is both the plugin root and its own marketplace, so it installs from a local path or from
-the git repo.
-
-From a local checkout:
-
 ```bash
-claude plugin marketplace add /path/to/rendemo/plugin
+claude plugin marketplace add https://www.rendemo.com/marketplace.json
 claude plugin install rendemo@rendemo
 ```
 
-Or in an interactive session, `/plugin` and pick it from the marketplace you added.
+Both commands name `rendemo` — the first is the marketplace, the second is the plugin inside it. Or run
+`/plugin` in an interactive session and pick it from the marketplace you just added.
 
 Restart Claude Code afterwards — MCP servers are wired up at startup.
+
+Then `npx rendemo login` and you are done; see [The token step](#the-token-step) for what that does and
+why there is nothing to export.
+
+That catalog is served from rendemo.com and installs the plugin from npm
+([`rendemo-plugin`](https://www.npmjs.com/package/rendemo-plugin)), so updates resolve through the
+registry and `claude plugin list` shows a real version number.
+
+**The GitHub source still works** and is not going away:
+
+```bash
+claude plugin marketplace add jakegrepo/rendemo-plugin
+```
+
+Prefer it if you are pinning to a tag or a commit — npm sources take a `version`, git sources take
+`ref` and `sha`. **Team and Enterprise admins distributing through Organization settings → Plugins
+have to use it:** organisation sync does not support npm plugin sources at all. Both catalogs describe
+the same plugin; only where the files come from differs.
+
+**Working on the plugin itself?** It is developed in `plugin/` inside the Rendemo monorepo and mirrored
+here by `scripts/sync-plugin.mjs` on every push, so point the marketplace at that directory to test a
+change without a round trip through GitHub:
+
+```bash
+claude plugin marketplace add /path/to/rendemo/plugin
+```
 
 ### Requirements
 
@@ -156,7 +178,7 @@ Restart Claude Code afterwards — MCP servers are wired up at startup.
 - **Node 20 or newer on `PATH`**, because the helper is a Node script. (The old helper needed `npx`,
   so this is strictly less than before.)
 
-### Updating — it is two commands, and the first one is the one people miss
+### Updating
 
 ```bash
 claude plugin marketplace update rendemo
@@ -165,21 +187,20 @@ claude plugin update rendemo@rendemo
 
 Then restart Claude Code.
 
-**Running only the second one will tell you that you are already up to date, and it will be wrong.**
-Claude Code installs from a local *clone* of this repo, and `plugin update` compares against that clone
-— not against GitHub. Until the marketplace is refreshed the clone is whatever it was when you
-installed, so a plugin released this morning is invisible and the update command says so confidently.
-It is the single most likely reason a fix described in these notes appears not to have shipped.
+**On the npm install path the first command is a formality** — the catalog is a small JSON file served
+from rendemo.com and the plugin itself resolves through the registry, so there is no local clone to go
+stale. `claude plugin list` shows a real version, and it is the same number as
+`npm view rendemo-plugin version`.
 
-Two smaller edges worth knowing:
+**On the GitHub path, the first command is the one people miss, and skipping it is the single most
+likely reason a fix described in these notes appears not to have shipped.** Claude Code installs from a
+local *clone* of the marketplace repo and `plugin update` compares against that clone, not against
+GitHub. Until the marketplace is refreshed the clone is whatever it was when you installed, so a plugin
+released this morning is invisible and the update command tells you you are current, confidently and
+wrongly. Running both commands is correct on either path, which is why both are listed.
 
-- `claude plugin update rendemo` fails with `Plugin "rendemo" not found`. The name has to be qualified
-  with its marketplace: `rendemo@rendemo`.
-- This plugin deliberately publishes **no `version` field**, so Claude Code uses the git commit as the
-  version — `claude plugin list` shows a SHA like `1a2c3c4ef96d` rather than a number. That is why
-  every commit is an update (see [Why `plugin.json` has no `version`](#why-pluginjson-has-no-version)),
-  and also why there is no version number to compare against by eye. To check what you are on, compare
-  that SHA to the latest commit on this repo.
+One smaller edge, on both paths: `claude plugin update rendemo` fails with `Plugin "rendemo" not
+found`. The name has to be qualified with its marketplace — `rendemo@rendemo`.
 
 ## The token step
 
@@ -288,7 +309,8 @@ plugin/
 ├── .claude-plugin/
 │   ├── plugin.json          name, description — deliberately NO version, see below
 │   └── marketplace.json     so plugin/ can be added as a marketplace directly
-├── .mcp.json                the Rendemo MCP server (HTTP + headersHelper + bearer fallback)
+├── .mcp.json                the Rendemo MCP server (HTTP + headersHelper, and deliberately
+│                            NO static Authorization header — see the token step)
 ├── commands/
 │   ├── start.md             /rendemo:start   — router: demo or tour?
 │   ├── demo.md              /rendemo:demo
@@ -396,10 +418,15 @@ discards it and falls back to the `RENDEMO_API_TOKEN` header, and `npx rendemo d
 
 Claude Code uses the plugin's version as the cache key for updates: *"Users get updates only when you
 bump this field. Pushing new commits without bumping it has no effect, and `/plugin update` reports
-'already at the latest version'."* Omitting it instead means users get updates on every new commit to
-the plugin's git source. While this is iterating quickly that is the behaviour worth having, so the field
-is left out on purpose — it is not an oversight, and adding it back means owning a bump on every change
-users need to receive.
+'already at the latest version'."* Omitting it means a git-sourced install falls back to the commit SHA,
+so every commit is an update — the behaviour worth having while this iterates quickly. So the field is
+absent on purpose, and it stays absent: it governs the **GitHub** path, which is still live.
+
+**The npm path versions itself, and that is where the bump now lives.** `plugin/package.json` in the
+monorepo carries the version, `npm publish` makes it the one users resolve, and
+`.github/workflows/publish-plugin.yml` **refuses to publish at all** if that number already exists on
+the registry — before it mirrors anything, so the two install paths cannot drift a version apart. The
+practical consequence: a change to `plugin/` needs a version bump or CI goes red and tells you so.
 
 It works inside a checkout of the Rendemo repo too — that repo's root package is named `rendemo-app`
 so it does not shadow the CLI. (It additionally offers `npm run tour:check`, which builds the CLI from

@@ -1,0 +1,40 @@
+{
+  "name": "rendemo-plugin",
+  "version": "1.0.1",
+  "description": "The Rendemo Claude Code plugin. /rendemo:demo installs a published demo on your site; /rendemo:tour authors a marker-anchored product tour. Wraps the Rendemo MCP server so you state an intent instead of picking tools.",
+  "keywords": [
+    "rendemo",
+    "claude-code",
+    "claude-code-plugin",
+    "mcp",
+    "demo",
+    "embed",
+    "product-tour",
+    "onboarding"
+  ],
+  "license": "MIT",
+  "homepage": "https://www.rendemo.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jakegrepo/rendemo-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jakegrepo/rendemo-plugin/issues"
+  },
+  "files": [
+    ".claude-plugin",
+    ".mcp.json",
+    "bin",
+    "commands",
+    "skills",
+    "presentation-capabilities.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
