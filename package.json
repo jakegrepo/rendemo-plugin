@@ -1,6 +1,6 @@
 {
   "name": "rendemo-plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "The Rendemo Claude Code plugin. /rendemo:demo installs a published demo on your site; /rendemo:tour authors a marker-anchored product tour. Wraps the Rendemo MCP server so you state an intent instead of picking tools.",
   "keywords": [
     "rendemo",
