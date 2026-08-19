@@ -1,6 +1,6 @@
 {
   "name": "rendemo",
-  "description": "Install published Rendemo demos and author marker-anchored product tours with Rendemo's seven professional step-card systems. Wraps the Rendemo MCP server so you state an intent instead of picking tools.",
+  "description": "One product. /rendemo:demo and /rendemo:tour are publish modes of the same capture, not two listings and not two value props. Founders author with the MCP.",
   "author": {
     "name": "Rendemo",
     "url": "https://www.rendemo.com"
