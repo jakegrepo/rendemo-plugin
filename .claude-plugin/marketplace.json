@@ -1,6 +1,6 @@
 {
   "name": "rendemo",
-  "description": "Embed a published demo or author a marker-anchored tour with Rendemo's complete step-card systems.",
+  "description": "Rendemo is interactive walkthroughs of your product, on the marketing site or in the app.",
   "owner": {
     "name": "Rendemo",
     "url": "https://www.rendemo.com"
@@ -9,7 +9,7 @@
     {
       "name": "rendemo",
       "source": "./",
-      "description": "Install published demos and author product tours with Rendemo's seven composition-led step-card systems.",
+      "description": "One product. /rendemo:demo and /rendemo:tour are publish modes of the same capture, not two listings and not two value props. Founders author with the MCP.",
       "homepage": "https://www.rendemo.com"
     }
   ]
