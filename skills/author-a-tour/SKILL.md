@@ -1,28 +1,23 @@
 ---
 name: author-a-tour
-description: 'This skill should be used when the user asks to "add a product tour", "build a guided tour of our app", "onboard new users in the app", "create a tour", or to CHANGE an existing one — "add a step to the onboarding tour", "reword step 3", "reorder the tour", "drop the billing step", "take the tour down" — or mentions `data-rendemo`, `rendemo.tours.json`, `rendemo_create_tour`, `rendemo_add_tour_step`, `rendemo_list_tours`, `rendemo_remove_tour_step`, `rendemo_get_tour_preview`, `rendemo_probe_tour_targets`, or wants step-by-step guidance on a real product — their own, or a site crawled into a sandbox replica — rather than a recorded demo. Covers both visits: authoring a tour (find the sequence, get approval, write markers, preview, publish, commit the lockfile, verify) and editing one (add, reword, reorder, remove a step and its marker together, retire the whole tour cleanly).'
-version: 0.9.0
+description: 'Use when the user asks to create or change a CODEBASE TOUR inside their own live product, or mentions data-rendemo markers, rendemo.tours.json, rendemo_create_tour, rendemo_add_tour_step, rendemo_list_tours, rendemo_probe_tour_targets, or the tour lockfile. A tour always runs in customer code and requires source markers. A crawled hosted replica is a sandbox demo and must use the sandbox-demos skill instead.'
+version: 1.0.0
 ---
 
 # Author a Rendemo product tour
 
-A **tour** is step-by-step guidance on the user's own product, which they perform for real. The other
-artifact Rendemo makes is a **demo** — a recorded replay a visitor watches in an iframe — and that is a
-different skill (`embed-a-demo`). Watching versus doing is the whole distinction.
+A **tour** is step-by-step guidance on the user's own live product, which they perform for real.
+It always uses `data-rendemo` markers in customer source and a `rendemo.tours.json` lockfile.
+Recorded demos and hosted sandbox demos are demos, not tours.
 
 **This skill covers two visits.** Building a tour that does not exist yet is sections 1-10. Changing
 one that does — add a step, reword one, reorder them, drop one, retire the whole thing — is section 0
 and "Editing an existing tour". `rendemo_list_tours` is what tells you which visit this is, and it is
 the first call either way.
 
-**It also assumes a repo, and one kind of request does not have one.** A tour can instead run on a
-**sandbox** — a site Rendemo crawled from a URL into a replica we host — and then there is no source
-to write a marker into, so most of what follows is wrong rather than merely inapplicable: no markers,
-no lockfile to commit, no `rendemo check`, and a publish order this procedure does not describe. The
-tell is the input. If the user gave a URL and no repo, or said "make a tour of {someone's site}", or
-you are working against an existing sandbox demo, load `sandbox-tours` with `rendemo_load_craft_skill`
-and follow that instead of this. The two are not blendable — a tour whose steps mix sandbox targets
-and repo markers is refused at publish, so pick one before authoring a single step.
+**This procedure assumes a repo.** If the user gives a URL or existing sandbox instead of customer
+source, they are asking for a sandbox demo. Load `sandbox-demos` and use the sandbox-demo MCP tools;
+do not create a tour project as a substitute.
 
 ## Do not open with a preamble
 

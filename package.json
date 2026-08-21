@@ -1,7 +1,7 @@
 {
   "name": "rendemo-plugin",
-  "version": "1.0.3",
-  "description": "One product. /rendemo:demo and /rendemo:tour are publish modes of the same capture, not two listings and not two value props. Founders author with the MCP.",
+  "version": "1.1.0",
+  "description": "The Rendemo Claude Code plugin. Authors hosted sandbox demos, installs published demos, and builds marker-anchored codebase tours through the Rendemo MCP.",
   "keywords": [
     "rendemo",
     "claude-code",

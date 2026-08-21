@@ -1,5 +1,5 @@
 ---
-description: Author or edit a product tour anchored to markers in this repo
+description: Author or edit a codebase tour anchored to markers in this repo
 argument-hint: <the tour to build or change — e.g. "onboarding for new users", "drop the billing step">
 ---
 

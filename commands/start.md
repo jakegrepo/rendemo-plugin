@@ -1,5 +1,5 @@
 ---
-description: Start here — pick a Rendemo demo or a Rendemo tour, then hand off
+description: Start here — choose a recorded demo, sandbox demo, or codebase tour
 argument-hint: <what you want — e.g. "show our product on the pricing page" or "walk new users through setup">
 ---
 
@@ -59,13 +59,15 @@ How to read it:
 If `npx` is unavailable or the command cannot run at all, say so in that same one line and continue —
 a preflight that cannot run must not stop the work. Do not substitute a guess about readiness.
 
-## The two things Rendemo makes
+## The three authoring paths
 
-Rendemo makes exactly two things, and they are not variations of each other:
+Rendemo has three distinct authoring paths:
 
-- **A demo** — a recording of your product that a visitor **watches** in an iframe on your site. Nobody
+- **A recorded demo** — a recording of your product that a visitor **watches** in an iframe on your site. Nobody
   touches your real app; you record once and it replays.
-- **A tour** — step-by-step guidance on your **own live product**, which the person **performs for
+- **A sandbox demo** — a hosted demo built from a crawled replica. It has normal demo steps, cards,
+  emphasis, autoplay and a shareable URL. It writes nothing into customer source and has no lockfile.
+- **A codebase tour** — step-by-step guidance on your **own live product**, which the person **performs for
   real**. Cards anchor to `data-rendemo` markers you put in your source and advance when they do the
   thing.
 
@@ -80,24 +82,29 @@ tour skill"* is three clauses of thinking out loud, and the user learns which on
 watching you do it. Name the choice in a few words only when it is genuinely close, or when picking
 wrong would waste their time.
 
-Signals for a **demo**: "on our pricing page", "on the site", "landing page", "watch", "video",
-"already recorded", "share with a prospect", a named published demo.
+Signals for a **recorded demo**: "on our pricing page", "landing page", "watch", "video",
+"already recorded", a named published recording.
 
-Signals for a **tour**: "in the app", "our users", "onboarding", "walk them through", "guide them",
+Signals for a **sandbox demo**: a public URL with no repo, "crawl", "sandbox", "replica", "make a
+demo of this site", or an existing sandbox demo. Load `sandbox-demos` and use
+`rendemo_create_sandbox_demo` / `rendemo_add_sandbox_demo_step`.
+
+Signals for a **codebase tour**: "in the app", "our users", "onboarding", "walk them through", "guide them",
 "first-run", "empty state", "product tour", "they should click", a route inside the product.
 
 Then:
 
-- **Demo** → run `/rendemo:demo` with their intent, or invoke the `rendemo:embed-a-demo` skill
+- **Recorded or already-published sandbox demo** → run `/rendemo:demo` with their intent, or invoke the `rendemo:embed-a-demo` skill
   directly and follow it end to end.
-- **Tour** → run `/rendemo:tour` with their intent, or invoke the `rendemo:author-a-tour` skill
+- **New sandbox demo** → invoke the `rendemo:sandbox-demos` skill and follow it end to end.
+- **Codebase tour** → run `/rendemo:tour` with their intent, or invoke the `rendemo:author-a-tour` skill
   directly and follow it end to end.
 
 **If the intent is genuinely ambiguous, or `$ARGUMENTS` is empty, ask one question — not a
 questionnaire:**
 
-> Do you want visitors to **watch** a recording of the product (a demo, embedded on a page), or to be
-> **guided through your real product while they use it** (a tour, anchored to markers in your source)?
+> Do you want a **recorded demo**, a **hosted sandbox demo built from a URL**, or guidance inside
+> your **real product code** (a tour anchored to source markers)?
 
 Two cases worth naming rather than guessing at:
 

@@ -11,7 +11,8 @@ The user's intent: $ARGUMENTS
 to end", no announcing which procedure step you have reached. Say what you *found* and what you are
 *doing*. The user asked for a demo on a page; they did not ask how this plugin is organised.
 
-**A demo is a recording a visitor WATCHES in an iframe.** If the intent is really about guiding people
+**A demo is a hosted experience a visitor watches or autoplays, whether it comes from a recording or
+a crawled sandbox replica.** If the intent is really about guiding people
 through their own live product — "walk our users through setup", "onboard new signups in the app",
 "they should click the New project button" — that is a **tour**, not a demo, and it is a different
 procedure: markers written into their source, no recording, no iframe. Say so and point them at

@@ -1,6 +1,6 @@
 {
   "name": "rendemo",
-  "description": "One product. /rendemo:demo and /rendemo:tour are publish modes of the same capture, not two listings and not two value props. Founders author with the MCP.",
+  "description": "Author hosted sandbox demos, install published Rendemo demos, and build marker-anchored codebase tours. Wraps the Rendemo MCP server so you state an intent instead of picking tools.",
   "author": {
     "name": "Rendemo",
     "url": "https://www.rendemo.com"

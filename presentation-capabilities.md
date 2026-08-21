@@ -17,14 +17,14 @@ This file is generated from `shared/presentations/registry.ts`, the same authori
 
 | ID | Recipe | Roles | Materials | Motion | Targets | Copy budget H/B | Max occlusion |
 |---|---|---|---|---|---|---:|---:|
-| `anchor-tooltip` | Anchor Tooltip | `act` | `precision`, `brand-minimal`, `glass` | `focus`, `still`, `trace` | `direct-tether` | 44/96 | 22% |
-| `pulse-note` | Pulse Note | `act` | `brand-minimal`, `precision`, `glass` | `pulse`, `still`, `focus` | `target-orbit`, `direct-tether` | 38/72 | 12% |
-| `floating-callout` | Floating Callout | `explain` | `precision`, `paper`, `brand-minimal`, `glass` | `focus`, `still`, `draw` | `edge-connector`, `none`, `framing-corners` | 56/150 | 25% |
-| `text-modal` | Text Modal | `act`, `explain`, `transition`, `close` | `precision`, `glass`, `brand-minimal`, `paper` | `focus`, `assemble`, `still` | `none`, `spatial-reframe` | 68/180 | 35% |
-| `media-modal` | Media Modal | `transition`, `close`, `explain` | `glass`, `obsidian`, `brand-minimal`, `soft-spatial` | `assemble`, `focus`, `still` | `none`, `spatial-reframe` | 72/180 | 35% |
+| `anchor-tooltip` | Anchor Tooltip | `act` | `precision`, `brand-minimal`, `glass` | `assemble`, `trace`, `pulse`, `still` | `direct-tether`, `magnified-lens` | 44/96 | 22% |
+| `pulse-note` | Pulse Note | `act` | `brand-minimal`, `precision`, `glass` | `assemble`, `pulse`, `still`, `trace` | `target-orbit`, `direct-tether`, `magnified-lens` | 38/72 | 12% |
+| `floating-callout` | Floating Callout | `explain` | `precision`, `paper`, `brand-minimal`, `glass` | `assemble`, `sweep`, `still` | `edge-connector`, `none`, `framing-corners`, `magnified-lens` | 56/150 | 25% |
+| `text-modal` | Text Modal | `act`, `explain`, `transition`, `close` | `precision`, `glass`, `brand-minimal`, `paper` | `assemble`, `morph`, `still` | `none`, `spatial-reframe` | 68/180 | 35% |
+| `media-modal` | Media Modal | `transition`, `close`, `explain` | `glass`, `obsidian`, `brand-minimal`, `soft-spatial` | `assemble`, `morph`, `still` | `none`, `spatial-reframe` | 72/180 | 35% |
 | `decision-canvas` | Decision Canvas | `decide` | `precision`, `editorial`, `glass`, `obsidian`, `paper`, `luminous`, `soft-spatial`, `brand-minimal` | `morph`, `assemble`, `sweep`, `still` | `spatial-reframe`, `none` | 68/130 | 30% |
-| `proof-stack` | Proof Stack | `prove` | `paper`, `editorial`, `glass`, `obsidian`, `brand-minimal` | `assemble`, `draw`, `morph`, `still` | `framing-corners`, `spatial-reframe`, `none` | 72/165 | 34% |
-| `scene-break` | Scene Break | `transition` | `precision`, `editorial`, `glass`, `obsidian`, `paper`, `luminous`, `soft-spatial`, `brand-minimal` | `trace`, `sweep`, `draw`, `focus`, `morph`, `assemble`, `still` | `none`, `spatial-reframe` | 84/180 | 100% |
+| `proof-stack` | Proof Stack | `prove` | `paper`, `editorial`, `glass`, `obsidian`, `brand-minimal` | `assemble`, `morph`, `sweep`, `still` | `framing-corners`, `spatial-reframe`, `none` | 72/165 | 34% |
+| `scene-break` | Scene Break | `transition` | `precision`, `editorial`, `glass`, `obsidian`, `paper`, `luminous`, `soft-spatial`, `brand-minimal` | `trace`, `sweep`, `morph`, `assemble`, `still` | `none`, `spatial-reframe` | 84/180 | 100% |
 | `outcome-stage` | Outcome Stage | `close` | `precision`, `editorial`, `glass`, `obsidian`, `paper`, `luminous`, `soft-spatial`, `brand-minimal` | `trace`, `sweep`, `morph`, `assemble`, `still` | `none` | 86/185 | 100% |
 
 ## MCP workflow

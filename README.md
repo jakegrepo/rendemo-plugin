@@ -1,10 +1,6 @@
 # The Rendemo Claude Code plugin
 
-Rendemo is interactive walkthroughs of your product, on the marketing site or in the app.
-
-One product. /rendemo:demo and /rendemo:tour are publish modes of the same capture, not two listings and not two value props. Founders author with the MCP.
-
-Rendemo's MCP server has ~70 tools. That is an API, not an interface: you would have to know which
+Rendemo's MCP server has dozens of tools. That is an API, not an interface: you would have to know which
 tool to call, in what order, with what arguments. This plugin ships the **workflow** instead — you
 state an intent and the agent sequences the tools, stops at the checkpoints that matter, and writes
 the files the MCP cannot touch.
@@ -15,10 +11,26 @@ Before publishing, the workflow must run `rendemo_review_step_presentations`; in
 role-incompatible recipes, missing required content, and copy overflow are publish blockers.
 
 ```
-/rendemo:start
-/rendemo:demo
-/rendemo:tour
+/rendemo:start           pick the right artifact, if you're not sure which you want
+/rendemo:demo            add our onboarding demo to the pricing page
+/rendemo:tour            onboarding for new users
 ```
+
+## Three things, and they are not variations of each other
+
+- **A demo** is a recording of your product that a visitor **watches** in an iframe on your site.
+  Nobody touches your real app. Installed with one script tag carrying `data-demo`, inline or as a
+  modal.
+- **A sandbox demo** is a hosted, autoplayable demo built from a site Rendemo crawled into a replica.
+  It is shareable like a recorded demo, writes no markers into customer source, and uses the
+  `sandbox-demos` skill.
+- **A tour** is step-by-step guidance on your **own live product**, which the person **performs for
+  real**. Cards anchor to `data-rendemo` markers in your source and advance when they do the thing.
+  Same tag, plus `data-mode="tour"`.
+
+Watching versus doing is the whole distinction. A demo goes on a marketing page for someone who has not
+signed up; a tour goes inside the app for someone who has. `/rendemo:start` asks in one question if that is
+not obvious from what you typed.
 
 ## Read this before using `/rendemo:tour`
 
@@ -308,6 +320,7 @@ plugin/
 │   └── tour.md              /rendemo:tour
 ├── skills/
 │   ├── embed-a-demo/SKILL.md
+│   ├── sandbox-demos/SKILL.md
 │   └── author-a-tour/SKILL.md
 └── README.md
 ```
