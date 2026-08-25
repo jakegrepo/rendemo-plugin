@@ -17,8 +17,11 @@ This file is generated from `shared/presentations/registry.ts`, the same authori
 
 | ID | Recipe | Roles | Materials | Motion | Targets | Copy budget H/B | Max occlusion |
 |---|---|---|---|---|---|---:|---:|
-| `anchor-tooltip` | Anchor Tooltip | `act` | `precision`, `brand-minimal`, `glass` | `assemble`, `trace`, `pulse`, `still` | `direct-tether`, `magnified-lens` | 44/96 | 22% |
-| `pulse-note` | Pulse Note | `act` | `brand-minimal`, `precision`, `glass` | `assemble`, `pulse`, `still`, `trace` | `target-orbit`, `direct-tether`, `magnified-lens` | 38/72 | 12% |
+| `caption` | Caption | `act`, `explain` | `precision`, `brand-minimal`, `editorial`, `glass`, `paper` | `assemble`, `trace`, `sweep`, `still` | `direct-tether`, `edge-connector`, `magnified-lens`, `none` | 62/132 | 16% |
+| `slate` | Slate | `act`, `explain`, `transition` | `obsidian`, `precision`, `editorial`, `glass`, `paper`, `brand-minimal` | `sweep`, `assemble`, `trace`, `still` | `none`, `direct-tether` | 72/150 | 20% |
+| `lens` | Lens | `act` | `glass`, `precision`, `obsidian`, `brand-minimal` | `assemble`, `pulse`, `trace`, `still` | `magnified-lens`, `direct-tether`, `target-orbit` | 48/104 | 14% |
+| `anchor-tooltip` | Classic tooltip | `act` | `precision`, `brand-minimal`, `glass` | `assemble`, `trace`, `pulse`, `still` | `magnified-lens`, `direct-tether` | 44/96 | 22% |
+| `pulse-note` | Pulse Note | `act` | `brand-minimal`, `precision`, `glass` | `assemble`, `pulse`, `still`, `trace` | `magnified-lens`, `target-orbit`, `direct-tether` | 38/72 | 12% |
 | `floating-callout` | Floating Callout | `explain` | `precision`, `paper`, `brand-minimal`, `glass` | `assemble`, `sweep`, `still` | `edge-connector`, `none`, `framing-corners`, `magnified-lens` | 56/150 | 25% |
 | `text-modal` | Text Modal | `act`, `explain`, `transition`, `close` | `precision`, `glass`, `brand-minimal`, `paper` | `assemble`, `morph`, `still` | `none`, `spatial-reframe` | 68/180 | 35% |
 | `media-modal` | Media Modal | `transition`, `close`, `explain` | `glass`, `obsidian`, `brand-minimal`, `soft-spatial` | `assemble`, `morph`, `still` | `none`, `spatial-reframe` | 72/180 | 35% |
