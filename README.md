@@ -142,8 +142,8 @@ Both commands name `rendemo` — the first is the marketplace, the second is the
 
 Restart Claude Code afterwards — MCP servers are wired up at startup.
 
-Then `npx rendemo login` and you are done; see [The token step](#the-token-step) for what that does and
-why there is nothing to export.
+Then just use it. The first Rendemo tool call triggers a browser sign-in — approve, pick your
+workspace, done. No CLI, no token, nothing to export; see [Signing in](#signing-in).
 
 That catalog is served from rendemo.com and installs the plugin from npm
 ([`rendemo-plugin`](https://www.npmjs.com/package/rendemo-plugin)), so updates resolve through the
@@ -170,16 +170,10 @@ claude plugin marketplace add /path/to/rendemo/plugin
 
 ### Requirements
 
-- **A recent Claude Code.** The plugin's `headersHelper` locates the script it ships via
-  `${CLAUDE_PLUGIN_ROOT}`, and old builds passed that placeholder to the shell literally instead of
-  substituting it. Verified substituting on **2.1.217 and 2.1.219**; **2.1.158 did not**. The exact
-  cutoff between those two is not something we have pinned down, so if you are on anything older than
-  2.1.217 and the Rendemo tools do not appear, that is the first thing to suspect — the helper fails
-  instantly rather than misbehaving, and `npx rendemo doctor` names it. On an older Claude Code, use
-  `npx rendemo login` and take the `~/.claude.json` option: that entry carries the token itself and
-  needs no helper, no substitution and no particular version.
-- **Node 20 or newer on `PATH`**, because the helper is a Node script. (The old helper needed `npx`,
-  so this is strictly less than before.)
+- **Claude Code 2.1.85 or newer.** That is where OAuth for HTTP MCP servers landed, and OAuth is the
+  plugin's whole sign-in story. (Older builds shipped a `headersHelper` token flow; it was retired —
+  helper failures could permanently poison the server connection, and the mechanism exists in no
+  other MCP client, so the same plugin tree can now serve marketplaces beyond Claude Code.)
 
 ### Updating
 
@@ -205,105 +199,42 @@ wrongly. Running both commands is correct on either path, which is why both are 
 One smaller edge, on both paths: `claude plugin update rendemo` fails with `Plugin "rendemo" not
 found`. The name has to be qualified with its marketplace — `rendemo@rendemo`.
 
-## The token step
+## Signing in
 
-The Rendemo MCP endpoint authenticates with a **per-workspace** bearer token, so no token can ship
-inside the plugin. There is one way to supply one — `npx rendemo login` — and an environment variable
-for CI and overrides.
+The Rendemo MCP endpoint speaks OAuth 2.1 with full discovery — the first tool call answers 401 with
+a `WWW-Authenticate` challenge, Claude Code opens a browser, you approve where you are already signed
+in and pick a workspace, and Claude Code stores and refreshes the tokens itself. There is no setup
+step for a person: install, ask for a demo, approve once.
 
-**You do not have to export anything.** The plugin's `.mcp.json` declares a Claude Code
-[`headersHelper`](https://code.claude.com/docs/en/mcp): a command whose stdout supplies the request
-headers. It runs `bin/mcp-token.mjs`, a script the plugin ships, which reads the token `rendemo login`
-stored and prints `{"Authorization":"Bearer …"}`. So logging in is the whole setup.
+`/mcp` shows the `rendemo` server and is where you re-authenticate or switch workspaces (sign in
+again and pick a different one — every tool is scoped to the authorized workspace, and no tool
+accepts a workspace id).
 
-That matters because a static `Bearer ${RENDEMO_API_TOKEN}` header resolves **from the environment of
-the shell that launched `claude`** — it can never see the config file `rendemo login` writes. Without a
-helper, a successful login left the MCP unable to authenticate until you also exported the variable by
-hand: a setup step that reports success and leaves the thing broken. The helper reads
-`RENDEMO_API_TOKEN` too, first, so the CI path is unchanged and there is nothing left for a second
-static header to add.
+### CI and headless
 
-### Why the helper is a shipped script and not `npx rendemo token`
+Automation cannot approve a browser prompt, so headless runs authenticate with a workspace API token
+instead. Get it from **Workspace settings** at https://www.rendemo.com, and declare the server in
+your own `.mcp.json` with a static header:
 
-It used to be `npx --yes rendemo token`, and that was the single biggest source of "the Rendemo tools
-did not load."
-
-Claude Code gives a `headersHelper` **ten seconds**, and a helper that misses it fails *silently* — no
-tools, no error, nothing in the session to indicate why. `npx` re-resolves the package on every session
-start, and that is not a fixed cost. Measured across 20 logged connection attempts on one machine with a
-**warm** cache: successful runs took 1.0, 1.2, 1.3, 1.5, 1.7, 1.8, 2.0, 2.1, 2.3, 2.4, 2.9, 4.1, 4.4,
-5.8, 6.2 and 9.4 seconds — and three runs hit the wall and failed. A 15% failure rate, worst when a
-session starts many MCP servers at once, which is exactly when you are least likely to suspect the
-token.
-
-The token lookup underneath was never the cost. The same work, done by the shipped script, is **~0.1
-seconds** — no npm, no registry, no network, just a file read. That is the whole change: a race became
-a file read.
-
-If you have a repo-scoped `.mcp.json` that still declares the `npx` form, it keeps working — it is the
-only form available to a committed file, which has no plugin directory to point at. `npx rendemo doctor`
-now measures it against the budget and warns when it is close, rather than reporting a single fast
-sample as healthy.
-
-### `npx rendemo login` (recommended)
-
-```bash
-npx rendemo login
+```json
+{
+  "mcpServers": {
+    "rendemo": {
+      "type": "http",
+      "url": "https://www.rendemo.com/api/mcp/mcp",
+      "headers": { "Authorization": "Bearer ${RENDEMO_API_TOKEN}" }
+    }
+  }
+}
 ```
 
-It prints a short code and a URL, you approve in a browser where you are already signed in, you pick a
-workspace, and it stores the token in a per-user config file outside every checkout —
-`%APPDATA%\rendemo\config.json` on Windows, `~/.config/rendemo/config.json` on macOS and Linux, 0600
-where the OS has file modes. **The token is never printed and never logged.** `npx rendemo logout`
-removes it.
+Set `RENDEMO_API_TOKEN` in the environment that launches the agent, and never commit it. The same
+token drives the REST API, the browser extension, and `npx rendemo login` for the CLI's own commands
+(`doctor`, `tour:check`) — CLI sign-in and MCP sign-in are separate credentials for the same
+workspace, and `npx rendemo doctor` reports on the CLI's, not the plugin's.
 
-It then offers to declare the MCP server for you:
-
-- **`~/.claude.json`** (per-user, in no repo) gets the real token, and no helper — that entry needs
-  nothing installed at all. It is only ever *edited*, never created, and backed up first.
-- **`.mcp.json` in your repo** gets the same pair the plugin ships: the `headersHelper` plus the
-  `Bearer ${RENDEMO_API_TOKEN}` placeholder. Never a credential, because a repo file can be committed.
-
-An existing `rendemo` entry is never silently replaced; it reports what it found and `--force` is the
-only way past that.
-
-Then `npx rendemo doctor` confirms it in one block: sign-in, workspace, tours, MCP server, **MCP
-headers**, version. That fifth line runs the helper command itself and checks that it produces a usable
-`Authorization` header inside the 10 seconds Claude Code allows — so "signed in, and the MCP still 401s"
-cannot be reported as ready. `/rendemo:start` runs the same check as its first act.
-
-### CI, and overriding by hand
-
-`RENDEMO_API_TOKEN` still works and is still the right answer for CI and for pointing one command at a
-different workspace. Get the token from **Workspace settings** at https://www.rendemo.com — the same one
-the browser extension uses — and set it in the shell you launch Claude Code from, **before** launching:
-
-```bash
-export RENDEMO_API_TOKEN="…"        # macOS / Linux
-$env:RENDEMO_API_TOKEN = "…"        # PowerShell
-```
-
-Do not commit it. It takes precedence over a stored login in both paths — the plain header and the
-helper, which resolves the variable first for exactly this reason — so it is also the usual cause of "I
-logged in but it is using the wrong workspace". `npx rendemo doctor` says which source is in play.
-
-Run `/mcp` to confirm a `rendemo` server is connected. If neither the helper nor the variable produced a
-credential, the server is listed but every call fails to authenticate — that is what a 401 from these
-tools means, and `npx rendemo doctor` names the reason.
-
-### `rendemo token`, and why it is not a way to look at your token
-
-`token` exists for the `headersHelper` and nothing else. It prints the literal credential to stdout, so
-it is the one command here whose output is a secret — do not run it to check whether you are signed in.
-`npx rendemo doctor` answers that without printing anything secret. With no token it exits 1 and prints
-nothing at all, deliberately: Claude Code merges helper headers *over* the static ones, so emitting an
-empty `Bearer` would wipe out the `RENDEMO_API_TOKEN` fallback and turn a working setup into an
-unexplained 401.
-
-Every tool is scoped to that token's workspace. No tool accepts a workspace id, so switching
-workspaces means switching tokens.
-
-Endpoint, for reference: `https://www.rendemo.com/api/mcp/mcp`, streamable HTTP, stateless.
+Endpoint, for reference: `https://www.rendemo.com/api/mcp/mcp`, streamable HTTP, stateless, OAuth
+2.1 with dynamic client registration.
 
 ## What ships
 
@@ -312,8 +243,9 @@ plugin/
 ├── .claude-plugin/
 │   ├── plugin.json          name, description — deliberately NO version, see below
 │   └── marketplace.json     so plugin/ can be added as a marketplace directly
-├── .mcp.json                the Rendemo MCP server (HTTP + headersHelper, and deliberately
-│                            NO static Authorization header — see the token step)
+├── .mcp.json                the Rendemo MCP server (HTTP; sign-in is OAuth, so it carries no
+│                            credential and no helper — see Signing in)
+├── .grok-plugin/plugin.json the same manifest for the Grok Build marketplace
 ├── commands/
 │   ├── start.md             /rendemo:start   — router: demo or tour?
 │   ├── demo.md              /rendemo:demo
@@ -327,8 +259,8 @@ plugin/
 
 ### `/rendemo:start <what you want>`
 
-The router. **Runs `npx rendemo doctor` first** and folds readiness into one clause — a missing token or
-a tour whose markers have gone otherwise surfaces halfway through the work, after the repo has been
+The router. **Runs `npx rendemo doctor` first** and folds readiness into one clause — a tour whose
+markers have gone otherwise surfaces halfway through the work, after the repo has been
 read and the steps proposed. Then it hands off. If what you typed already makes the intent obvious it
 just goes: it neither interrogates someone who was already clear, nor narrates which word decided the
 route and which skill it is invoking.
@@ -413,24 +345,16 @@ The CLI is a real, published package — `rendemo` on npm, `packages/cli` in the
 dependency-free JS file with a `rendemo` bin. On your own project, `npx rendemo check` just works, no
 install needed. **0.2.0 or newer** is required — that is the version that reads the
 `rendemo.tours.json` name; older ones only know the previous filename. `login`, `logout` and `doctor`
-arrived in **0.3.0**, and `token` — the `headersHelper` the plugin's `.mcp.json` calls — in **0.4.0**.
-On an npx cache still holding 0.3.0 the helper exits 2 with `Unknown command "token"`, Claude Code
-discards it and falls back to the `RENDEMO_API_TOKEN` header, and `npx rendemo doctor` names it on the
-**MCP headers** line.
+arrived in **0.3.0**. (The CLI's stored login is for its own commands — the plugin's MCP tools sign
+in over OAuth and never read it.)
 
-### Why `plugin.json` has no `version`
+### Versioning
 
-Claude Code uses the plugin's version as the cache key for updates: *"Users get updates only when you
-bump this field. Pushing new commits without bumping it has no effect, and `/plugin update` reports
-'already at the latest version'."* Omitting it means a git-sourced install falls back to the commit SHA,
-so every commit is an update — the behaviour worth having while this iterates quickly. So the field is
-absent on purpose, and it stays absent: it governs the **GitHub** path, which is still live.
-
-**The npm path versions itself, and that is where the bump now lives.** `plugin/package.json` in the
-monorepo carries the version, `npm publish` makes it the one users resolve, and
-`.github/workflows/publish-plugin.yml` **refuses to publish at all** if that number already exists on
-the registry — before it mirrors anything, so the two install paths cannot drift a version apart. The
-practical consequence: a change to `plugin/` needs a version bump or CI goes red and tells you so.
+`plugin.json` carries a semver `version` (the plugin directory's validator requires one), and it is
+the update cache key on the git install path: users get updates when it bumps, so a change to
+`plugin/` should bump it. The npm path resolves through the registry's own version in
+`package.json`; keep the two numbers matching. (Publishing the mirror is a manual
+`scripts/sync-plugin.mjs` run from the monorepo — the GitHub workflow that once did it is retired.)
 
 It works inside a checkout of the Rendemo repo too — that repo's root package is named `rendemo-app`
 so it does not shadow the CLI. (It additionally offers `npm run tour:check`, which builds the CLI from

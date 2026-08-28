@@ -7,48 +7,46 @@ The user's intent: $ARGUMENTS
 
 ## First, before anything else: one readiness check
 
-A missing token, a token for the wrong workspace, or a tour whose markers are no longer in source all
-surface today as an error *partway through authoring*, after the repo has been read and the steps
-proposed. All of it is knowable in one second. **Run this as your first act, before asking the user a
-single question:**
+A tour whose markers are no longer in source, or a CLI credential problem, surfaces today as an error
+*partway through authoring*, after the repo has been read and the steps proposed. All of it is
+knowable in one second. **Run this as your first act, before asking the user a single question:**
 
 ```bash
 npx --yes rendemo doctor
 ```
 
 It prints a six-line block: sign-in, workspace, tours, MCP server, MCP headers, version. It touches
-nothing and publishes nothing. The **MCP headers** line runs whichever `headersHelper` is actually
-declared — the plugin's shipped `bin/mcp-token.mjs`, or the `npx --yes rendemo token` form a repo's own
-`.mcp.json` carries — to prove the MCP server can reach the stored token. The plugin's takes about a
-tenth of a second; the `npx` form can take several, and doctor warns when it takes enough of the
-ten-second budget to be a coin flip rather than a cost.
+nothing and publishes nothing. Two credentials exist and they are separate: the **plugin's MCP tools
+sign in over OAuth** (Claude Code prompts a browser approval on first use; `/mcp` re-authenticates or
+switches workspace), while doctor's sign-in/headers lines describe the **CLI's own stored login** and
+legacy repo-scoped `.mcp.json` setups. If the Rendemo MCP tools are missing or every call returns
+unauthorized, the fix is `/mcp` → rendemo → authenticate — not the CLI.
 
 **Do not announce that you are running it.** "I'll start with the readiness check" is a sentence about
 your own procedure, and it arrives before the user has been told anything. Run it silently and let the
 result be the first thing they read.
 
 **Then fold readiness into ONE clause of the line you were going to say anyway** — never its own
-sentence, never its own turn: *"Signed in to Acme — which of these did you mean?"* or *"You are not
-signed in yet; `npx rendemo login` fixes that in about twenty seconds."* Do not paste the whole block
+sentence, never its own turn: *"Signed in to Acme — which of these did you mean?"* or *"The Rendemo
+tools need a one-time browser approval — run /mcp, pick rendemo, and authenticate."* Do not paste the whole block
 unless something failed, and when everything passes do not list what passed.
 
 How to read it:
 
-- **`✗ Sign-in`** — nothing is stored and `RENDEMO_API_TOKEN` is not set. Tell the user to run
-  `npx rendemo login`: it prints a short code and a URL, they approve in a browser where they are
-  already signed in, and the token is stored for them. **Do not run `login` for them without asking**
-  — it waits on a human approving in a browser, and starting it unasked leaves a terminal blocked.
-  Nothing else in this command works until this is fixed, so stop here and say so.
+- **`✗ Sign-in`** — the CLI has no stored login and `RENDEMO_API_TOKEN` is not set. This does NOT
+  block the MCP tools (they sign in over OAuth); it matters when the CLI itself will be used. If it
+  will, tell the user to run `npx rendemo login` — a short code, a browser approval, stored for
+  them. **Do not run `login` for them without asking** — it waits on a human approving in a browser,
+  and starting it unasked leaves a terminal blocked.
 - **`✗ Workspace`** — the token was rejected, or the deployment answered an error. Say which; the fix
-  is `npx rendemo login` again for the first and "try shortly" for the second.
+  is `/mcp` re-authentication for the MCP tools (or `npx rendemo login` for the CLI) for the first and "try shortly" for the second.
 - **`? Workspace`** — unreachable. That is a network problem, **not** a bad token. Do not tell them to
   re-authenticate.
 - **`✗ Tours`** — this repo already has a tour whose steps no longer resolve. Worth naming up front:
   it usually means someone deleted or moved a marked element, and `/rendemo:tour` can repair it.
-- **`✗ MCP headers`** — the token is stored and valid, but the command the MCP server uses to *read* it
-  cannot run, and `RENDEMO_API_TOKEN` is not set either. So every tool call will 401 even though the
-  sign-in looks fine. This is a blocker exactly like `✗ Sign-in`: stop and relay what the line says. It
-  normally means `npx` is not on PATH, or the npx cache holds a `rendemo` older than 0.4.0.
+- **`✗ MCP headers`** — only meaningful for a repo-scoped `.mcp.json` that declares its own header
+  or helper. The plugin's server uses OAuth and has no headers to check, so on a plugin-only setup
+  read this as informational; when a repo declares its own entry, relay what the line says.
 - **`? MCP headers`** — the helper works but sends a *different* token than the one doctor checked, so
   the Workspace line above is about a credential the MCP will not use. Say so; do not trust the
   workspace name.

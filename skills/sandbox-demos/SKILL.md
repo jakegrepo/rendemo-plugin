@@ -190,9 +190,9 @@ How to write the two that matter:
   `action` stays at 1x no matter how it is framed. Camera moves are worth two or three steps in a
   demo and no more.
 
-Emphasis follows the same scarcity rule as everywhere else: `ring` for most steps, `brackets` for a
-region, and `spotlight` for the one or two steps the demo exists to reach. A dim on every
-step is shouting.
+The mark follows the same scarcity rule as everywhere else: `ring` for most steps, `wash` or
+`dim-siblings` for a region, and `spotlight` for the one or two steps the demo exists to reach. A
+dim on every step is shouting.
 
 ## Verify, then publish in the right order
 

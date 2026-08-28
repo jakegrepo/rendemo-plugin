@@ -1,6 +1,6 @@
 {
   "name": "rendemo",
-  "description": "Author hosted sandbox demos, embed published demos, or build marker-anchored codebase tours with Rendemo.",
+  "description": "Polish and publish recorded demos, turn any website into a click-through sandbox demo, and build interactive product tours that run inside your own app.",
   "owner": {
     "name": "Rendemo",
     "url": "https://www.rendemo.com"
@@ -9,7 +9,7 @@
     {
       "name": "rendemo",
       "source": "./",
-      "description": "Author hosted sandbox demos, install published demos, and build marker-anchored codebase tours with Rendemo.",
+      "description": "Polish and publish recorded demos, turn any website into a click-through sandbox demo, and build interactive product tours that run inside your own app.",
       "homepage": "https://www.rendemo.com"
     }
   ]

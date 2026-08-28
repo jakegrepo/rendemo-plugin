@@ -1,7 +1,6 @@
 {
   "rendemo": {
     "type": "http",
-    "url": "https://www.rendemo.com/api/mcp/mcp",
-    "headersHelper": "node \"${CLAUDE_PLUGIN_ROOT}/bin/mcp-token.mjs\""
+    "url": "https://www.rendemo.com/api/mcp/mcp"
   }
 }
