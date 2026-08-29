@@ -260,6 +260,20 @@ when they are ready, not in advance.
 `rendemo_publish_demo` on a sandbox demo returns **409 `sandbox_not_published`** if the sandbox is
 still a draft or has been taken down.
 
+**5. `rendemo_review_demo_frames` — actually look at it.** Everything above this line is blind.
+`rendemo_check_sandbox_demo` proves a step's target still *resolves*; it says nothing about whether
+the card can be read, whether it covers the very element it points at, or whether the emphasis
+rendered at all. On a crawl-built demo those are the failures that actually happen, because the card
+is landing on someone else's page design rather than one you chose.
+
+This photographs the live demo at each step and hands you the images. Look, fix what is genuinely
+wrong, republish — the slug is kept, so the link survives. Two rules: the camera **cannot see blur**
+(headless Chrome drops `backdrop-filter`, so a glassy theme photographs flatter than it renders —
+never "fix" that), and a step that reads well needs nothing.
+
+Point it at the sandbox DEMO — the project whose steps you authored — not at the source sandbox,
+which has no steps to photograph.
+
 Four more refusals, all deliberate, all 422 unless noted:
 
 - **`sandbox_tour_mixed_targets`** — legacy wire code: some steps are sandbox-shaped and some are plain `route` steps.
@@ -320,7 +334,8 @@ pages need a signed-in browser) → `rendemo_get_crawl_status` → `rendemo_list
 `rendemo_find_in_sandbox` / `rendemo_read_sandbox_page` → `rendemo_create_sandbox_demo` →
 `rendemo_add_sandbox_demo_step` (`sandbox: { demoId, page, node }`) → `rendemo_update_step` /
 `rendemo_set_step_presentation` / `rendemo_direct_step` → `rendemo_check_sandbox_demo` →
-`rendemo_get_sandbox_demo_preview` → `rendemo_publish_sandbox` → `rendemo_publish_demo`.
+`rendemo_get_sandbox_demo_preview` → `rendemo_publish_sandbox` → `rendemo_publish_demo` →
+`rendemo_review_demo_frames` (look at it, fix, republish).
 
 Refreshing a published sandbox adds one more: `rendemo_crawl_site` (with `projectId`) →
 `rendemo_get_crawl_status` → `rendemo_review_staged_sandbox` → `rendemo_promote_staged_sandbox` →
