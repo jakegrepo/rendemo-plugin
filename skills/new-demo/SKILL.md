@@ -146,7 +146,34 @@ In order. Each step assumes the one before it.
 6. **Check it**: `rendemo_director_lint` for geometry, `rendemo_review_step_presentations` for
    whether the cards can actually be read. Lint passing is not evidence a step looks right.
 7. **`rendemo_publish_demo`** — world-visible, so confirm once, at this moment, not in advance.
-8. **Hand back the URL** and say what you decided that they might want to veto.
+8. **Look at it.** `rendemo_review_demo_frames` photographs the live demo step by step and hands you
+   the images. See below — this is the step that catches what the others cannot.
+9. **Hand back the URL** and say what you decided that they might want to veto.
+
+### Look at the demo before you call it done
+
+Everything up to here is blind. `rendemo_director_lint` reads geometry and passes while a card is
+unreadable, sits over a busy region, or covers the very thing it points at.
+`rendemo_render_step_card` draws the real card but over a stand-in shell, so it never sees the card
+against the real screen. Every card defect this product has shipped lived in exactly that gap.
+
+`rendemo_review_demo_frames` opens the published demo at each step, waits for the card to finish
+arriving, and returns real screenshots as images. Look at them and fix what is actually wrong: copy
+you cannot read, a card covering its target, emphasis that vanished into a light UI, text that
+clipped. Then republish — same link.
+
+Two rules that decide whether this helps or hurts:
+
+- **The camera cannot see blur.** Headless Chrome drops `backdrop-filter`: the dim paints and the
+  blur does not, so a glassy theme photographs flatter and harder-edged than a viewer ever sees it.
+  Judge legibility and contrast; never "the glass looks wrong". The tool repeats this in every
+  result because it is the one way a visual check makes a demo worse.
+- **A step that reads well needs nothing.** The failure mode of a review pass is finding something
+  to do. If five frames are fine, say they are fine.
+
+It photographs up to six steps per call and needs the demo published, because it photographs the
+real artifact at its real URL. That is why publishing comes first: publish, look, fix, republish —
+the slug is kept, so nobody is ever handed a link that breaks in between.
 
 ### The end card is the difference between a demo and a video
 
@@ -211,6 +238,7 @@ publish, then invite them in.
 `rendemo_update_step` / `rendemo_reorder_steps` →
 `rendemo_set_demo_presentation_theme` → `rendemo_set_title_card` → `rendemo_set_end_card` →
 `rendemo_director_lint` / `rendemo_review_step_presentations` → `rendemo_publish_demo` →
+`rendemo_review_demo_frames` (look at it, fix, republish) →
 `rendemo_get_embed` / `rendemo_create_tracking_link` → `rendemo_get_demo_analytics`.
 
 No recording available: `rendemo_start_browser_crawl` (signed-in pages, capture code) or
