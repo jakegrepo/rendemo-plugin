@@ -1,6 +1,6 @@
 {
   "name": "rendemo",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "Polish and publish the demos you record with the Rendemo extension, turn any website into a hosted click-through sandbox demo, and build interactive product tours that run inside your own live app. Wraps the Rendemo MCP server so you state an intent instead of picking tools.",
   "author": {
     "name": "Rendemo",
