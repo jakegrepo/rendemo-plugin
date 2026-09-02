@@ -1,6 +1,6 @@
 {
   "name": "rendemo-plugin",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "The Rendemo Claude Code plugin. Authors hosted sandbox demos, installs published demos, and builds marker-anchored codebase tours through the Rendemo MCP.",
   "keywords": [
     "rendemo",

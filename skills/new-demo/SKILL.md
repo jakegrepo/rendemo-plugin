@@ -61,6 +61,11 @@ Three ways a product gets into Rendemo. They are not equivalent, and the order m
    real data, pages behind a login included. Auto-direction runs the moment it uploads. **This is
    the best demo Rendemo can make, and it should be your default ask for anything that is a
    product.**
+   - *If they want YOU to do the walkthrough* rather than click through it themselves — "make the
+     demo, I don't want to drive" — that is **agent-driven recording**: they paste one code and you
+     perform the workflow on their signed-in tab while the recorder captures it. Same real take,
+     same auto-direction; you navigate it. See `drive-and-record`. A person who knows their product
+     still tells its story best, so offer this as the alternative, not the default.
 2. **A browser capture code** (`rendemo_start_browser_crawl`) — the person pastes one code into the
    extension, signed in as themselves, and **you** capture the pages through it with
    `rendemo_capture_pages`. Static replica, no real interaction, but it reaches signed-in pages when
