@@ -98,8 +98,11 @@ the capture snippet):
 
 - **You have no browser tools** (ChatGPT and most clients): call it anyway, give the author the
   capture code, and have them paste it into the Rendemo Chrome extension's *Capture pages for a
-  sandbox* popup mode. They click *Capture this page* on each page they want, signed in as
-  themselves, and tell you when they are done. Then you finish the crawl.
+  sandbox* popup mode, signed in, on the site. That paste is their whole job: from then on
+  `rendemo_capture_pages({ crawlId, url, urls })` opens each url you name in that signed-in tab and
+  captures it, holding the connection open while it works. Call it again with no `urls` while pages
+  are in flight; a url refused as a login wall needs them to sign in there first. They can still
+  click *Capture this page* for anything you would not know to ask for. Then you finish the crawl.
 - **You can drive the author's own browser** — their real, local browser, already signed in: per
   page — navigate, **let it finish rendering**, then evaluate the snippet with that page's index.
   The page uploads itself and returns a small receipt. A cloud or hosted browser you opened
