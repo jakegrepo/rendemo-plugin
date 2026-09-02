@@ -61,9 +61,10 @@ Three ways a product gets into Rendemo. They are not equivalent, and the order m
    real data, pages behind a login included. Auto-direction runs the moment it uploads. **This is
    the best demo Rendemo can make, and it should be your default ask for anything that is a
    product.**
-2. **A browser capture code** (`rendemo_start_browser_crawl`) — the person snapshots pages one at a
-   time with the extension, signed in as themselves. Static replica, no real interaction, but it
-   reaches signed-in pages when a recording is not on the table. See `sandbox-demos`.
+2. **A browser capture code** (`rendemo_start_browser_crawl`) — the person pastes one code into the
+   extension, signed in as themselves, and **you** capture the pages through it with
+   `rendemo_capture_pages`. Static replica, no real interaction, but it reaches signed-in pages when
+   a recording is not on the table, and costs them one paste. See `sandbox-demos`.
 3. **A headless crawl** (`rendemo_crawl_site`) — no human involved at all, public pages only,
    honours robots.txt. Right when the demo genuinely *is* the marketing site, or when nobody is
    available to record.
@@ -116,19 +117,26 @@ narrative. **Read it with `rendemo_get_plan` before you touch anything.** You ar
 not authoring from an empty file, and re-authoring what auto-direction already did is the most
 common way to make a demo worse and slower at the same time.
 
-### Watching a capture-code session too
+### A capture-code session: they paste once, you capture
 
-The same rule, one route down the ladder. When someone is capturing pages with a code from
-`rendemo_start_browser_crawl`, call `rendemo_watch_captures({ crawlId })` and it reports how many
-pages have really reached storage. Do this **after they capture their first page**, not at the end:
-a code that was never pasted, or a click that silently failed, is then caught while they are still
-at their desk rather than after they have walked the entire product for nothing. A real session once
-reported "we captured 4 pages" when zero had arrived — this is what prevents that.
+One route down the ladder the roles flip. The person pastes the capture code from
+`rendemo_start_browser_crawl` into the extension, signed in, on the site — and that paste is the
+whole of their job. From then on **you** name the pages: `rendemo_capture_pages({ crawlId, url,
+urls })` opens each url in that signed-in tab, captures it, and holds the connection open while it
+does. Send the product's real screens (the dashboard, a list, a detail view, settings), not the
+marketing site, and do not ask them to click anything per page.
 
-The stopping rule here is the opposite of the recording one. There is no event meaning "finished",
-because only the person knows when they have enough pages. So when the count stops moving, ask them,
-and call `rendemo_finish_browser_crawl` when they say yes — it verifies against storage rather than
-trusting the number you pass, which is the other half of the same protection.
+Read the result the way you read a watch. It says whether the extension has joined at all — "nobody
+has pasted the code yet" is a different situation from "working", and the tool names which — then
+lists every url as captured, failed, or still in flight. In flight means call it again with no
+`urls`; that is not a stopping point. A url refused as a **login wall** means the tab is not signed
+in for that page: ask them to sign in there, then re-issue it. Pages they capture by hand with
+"Capture this page" land in the same crawl; `rendemo_watch_captures({ crawlId })` counts everything
+that reached storage either way, and is the cross-check before you finish.
+
+There is still no event meaning "finished" — the sandbox has enough when the story does. Call
+`rendemo_finish_browser_crawl` then; it verifies against storage rather than trusting the number you
+pass. Do not wait for the code to expire.
 
 ## The build pass
 
