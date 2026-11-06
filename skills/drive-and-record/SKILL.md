@@ -1,6 +1,6 @@
 ---
 name: drive-and-record
-description: Use when the user wants a demo of their signed-in product and wants YOU to do the walkthrough rather than record it themselves or tell you which buttons to click — "make a demo of my app and you drive it", "record a demo of my product without me clicking", "walk through my dashboard yourself and record it", "drive my signed-in session and build the demo". The agent REHEARSES the workflow unrecorded on the user's own signed-in tab through the Rendemo Chrome extension, PROPOSES the take as a numbered plan the user approves in chat, then RECORDS that plan as one clean take that auto-directs — no free-roam replica to leak, so it is the right route for a data-dense product (CRM, inbox, leads). Read it BEFORE rendemo_start_drive_session / rendemo_drive / rendemo_propose_drive_plan / rendemo_record_drive_plan: it covers the intake questions to ask first, the paste steps to hand the user, the unrecorded read→decide→act rehearsal, how to write the plan and get a yes, the Record click, and the hand-off to the build pass. A user who would rather click through it themselves wants a plain recording (`new-demo`).
+description: Rehearse and record a signed-in product walkthrough when the user wants the agent to drive their browser.
 version: 2.0.0
 ---
 
@@ -10,7 +10,7 @@ version: 2.0.0
 # Rehearse, propose, record
 
 The user has asked for a demo of their product and they do NOT want to walk it themselves, and they
-do NOT want to tell you which buttons to click. You drive their signed-in product tab. What comes
+do NOT want to tell you which buttons to click. You drive their product tab, signed in when needed. What comes
 out is a real recording — real screens, real transitions, real data — and because it is a recording
 there is no free-roam replica for anyone to wander into, which makes this the SAFE choice for a
 product whose screens are full of other people's data: a CRM, an inbox, a leads list.
@@ -22,16 +22,15 @@ back-to-back, a beat between them, nothing else. The recording holds the perform
 thinking. (The first takes that recorded the thinking were five minutes long with seconds of frozen
 screen between clicks and every failed retry in the footage. That is what this shape prevents.)
 
-This is one rung of the capture ladder in `new-demo`. Reach for it when all three are true: the demo
-is behind a login, the user wants the agent to do the walkthrough rather than record it themselves,
-and you can drive their browser through the extension. If the user would rather click through it
+This is one rung of the capture ladder in `new-demo`. Reach for it when the user wants the agent to
+do the walkthrough rather than record it themselves and you can drive their browser through the
+extension. It works for public products and signed-in workflows. If the user would rather click through it
 themselves, that is a plain recording (`new-demo`), and it is better when they have it in them.
 
-## Ask first — two or three short questions, then get out of the way
+## Establish the outcome and boundaries
 
-You are about to navigate a product you have never seen toward a goal only the user knows. Ask
-before you start. Keep it to three, lead with your read so they can just say yes, and never turn it
-into an interview:
+Use the request and prior answers to establish the following. Ask a concise question only where
+a missing answer affects the walkthrough or which live actions are authorized:
 
 1. **What is this demo for?** Selling to prospects, onboarding new users, teaching one feature. The
    answer sets the story shape and the theme, exactly as in `new-demo`'s intent table.
@@ -42,36 +41,35 @@ into an interview:
    send. You already refuse logout/delete-shaped navigation and destructive-looking clicks, but the
    user knows their product's landmines.
 
-Do not ask a fourth question, and do not ask them to plan the steps — the steps are yours to find.
+Infer the steps from the product. Preserve the concrete recording-plan approval described below.
 
 ## Starting the session
 
-`rendemo_start_drive_session({ url })` with the signed-in entry url. It returns a code. Hand the
+`rendemo_start_drive_session({ url })` with the product's entry url. It returns a code. Hand the
 user these steps verbatim — do not paraphrase:
 
 1. Have the Rendemo Chrome extension installed and connected to your Rendemo account.
-2. Open your product in Chrome and sign in the way you normally would.
-3. Click the Rendemo extension icon and choose **Let my AI drive this tab**.
-4. Paste the code, and approve the one-time permission prompt. Chrome will show a "Rendemo is
-   debugging this browser" bar — expected; it goes when the session ends.
+2. Open your product in Chrome. Sign in only if the workflow requires it.
+3. Click the Rendemo extension icon and open the **AI Drive** tab.
+4. Paste the code into **Drive code**, click **Connect your AI**, and approve any permission prompt.
+   Chrome will show a "Rendemo is debugging this browser" bar — expected; it goes when the session ends.
 5. Keep that tab in front and tell me once you are connected. Nothing is recorded yet.
 
-Then wait for them to say they are connected. Your first `rendemo_drive` also tells you whether they
+Then wait for them to say they are connected. Your first `rendemo_drive_read` also tells you whether they
 are: a "session has not started" result means the code is not pasted yet — not a stopping point,
 call it again with the SAME session. Never mint a second code; that abandons the first.
 
 ## Phase 1 — rehearse: the read, decide, act loop, unrecorded
 
 Nothing is recorded here, so explore freely. The rule is simple: **you choose every target; you
-never ask the user which one.** Each `rendemo_drive` returns what the page looks like after the
+never ask the user which one.** Each browser operation tool returns what the page looks like after the
 action, including a `read` outline where every button, link and field carries a selector in `«…»`.
 That outline is your map.
 
-1. **Read the landing.** `rendemo_drive({ sessionId, url, action: { op: "read" } })`.
+1. **Read the landing.** `rendemo_drive_read({ sessionId, url })`.
 2. **Decide the next move toward the outcome** the user named. Pick a target from the outline by
    its selector, or by its visible text.
-3. **Act.** `navigate`, `click`, `type`, `scroll`. The extension resolves the target and clicks the
-   real element with trusted input.
+3. **Act.** Use `rendemo_drive_navigate({ sessionId, url, targetUrl })`, `rendemo_drive_click({ sessionId, url, selector, text })`, `rendemo_drive_type({ sessionId, url, selector, text, submit })`, `rendemo_drive_select({ sessionId, url, selector, label })`, or `rendemo_drive_scroll({ sessionId, url, direction, amount, selector })`. Select takes an exact option label from an enabled single-choice native dropdown; it dispatches synthetic input/change events and may not work on sites that require trusted events. For settling use `rendemo_drive_wait({ sessionId, url, ms })`. Only pass fields needed for the operation. The extension resolves the target and uses trusted input for clicks and typing when the debugger is attached.
 4. **Read again**, and repeat. Backtrack when a path dead-ends. Note which selectors and texts
    actually worked — those are what the plan will use.
 
@@ -86,6 +84,14 @@ role — say so plainly and ask the user to click that ONE step themselves, then
 `rendemo_propose_drive_plan({ sessionId, url, title, steps })`. Each step is a visible action with a
 one-sentence `purpose` — what the viewer learns from it — and optionally a longer `settleMs` after
 a slow transition. Never a `read`; reads are dead time and the tool refuses them.
+Include at least one real click or type action: navigation and scrolling alone do not provide the
+interaction evidence the demo generator needs. Rehearse and verify the resulting page after each
+click; a command receipt alone does not prove the intended destination opened. Use a unique selector
+when text matches more than one visible control.
+For each important result, set `expect` to a unique CSS selector and, where needed, text that you
+actually observed after the action during rehearsal and that is absent immediately before it.
+The extension waits for that visible result and stops the take if it was already present or does
+not appear. A click receipt by itself is not proof of the result.
 
 The plan is the demo's story, so write it like one:
 
@@ -102,12 +108,14 @@ replaces the old.
 ## Phase 3 — record the take
 
 Once approved: `rendemo_record_drive_plan({ sessionId, url })`, then tell the user in one line to
-click **Record the plan** in the Rendemo extension popup (Chrome needs their click to start the
+open the Rendemo extension popup, select **AI Drive**, and click **Record the plan**
+(Chrome needs their click to start the
 recorder). The tool holds open through their click and the take; if it comes back "waiting for the
 click" or "recording", call it again — not a stopping point. It returns when the take is done and
 uploading, with a per-step result. A step that fails stops the take there and says which one; what
-was recorded still uploads. Rehearse that step again, fix the plan, propose, and record again after
-the user approves.
+was recorded still uploads. Check the delivery result before watching for generation. If upload is
+unconfirmed, recover the saved take using the extension rather than recording it again. If an action
+failed, rehearse that step again, fix the plan, propose, and record again after the user approves.
 
 ## Then the build
 
@@ -119,14 +127,16 @@ frames, and publish once the user agrees. `demo-craft` governs the step scene.
 
 ## Waiting is a tool call, not a turn
 
-`rendemo_drive`, `rendemo_record_drive_plan` and `rendemo_watch_captures` hold the connection open
+The individual browser operation tools, `rendemo_record_drive_plan` and `rendemo_watch_captures` hold the connection open
 and return when something happens. When one comes back still-not-done, call it again immediately.
 Do not summarise the wait, do not ask the user to check, and do not end your turn.
 
 ## Tools
 
-`rendemo_start_drive_session` → (hand over the paste steps) → `rendemo_drive` (`read` → decide →
+`rendemo_start_drive_session` → (hand over the paste steps) → `rendemo_drive_read` (read → decide →
 act, repeated, unrecorded) → `rendemo_propose_drive_plan` (show the list, get a yes) →
 `rendemo_record_drive_plan` (they click Record the plan) → `rendemo_watch_captures` →
 `rendemo_get_plan` → the `new-demo` build pass → `rendemo_publish_demo`.
 `rendemo_finish_drive_session` ends a session early — abandon a rehearsal, or stop a take.
+
+Browser operations are individually exposed. Each stored plan step uses the corresponding exposed navigate/click/type/select/scroll/wait operation. `rendemo_propose_drive_plan` stores and displays the plan without executing it.

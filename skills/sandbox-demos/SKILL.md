@@ -1,6 +1,6 @@
 ---
 name: sandbox-demos
-description: This skill should be used when creating or editing a SANDBOX DEMO — a hosted, autoplayable demo built from a site Rendemo crawled into a replica — rather than a codebase tour. Use it when the user says "make a demo of <some website>", gives a URL and no codebase, mentions `rendemo_crawl_site`, a crawl, a sandbox or a replica, or is authoring against an existing sandbox demo — and before `rendemo_add_sandbox_demo_step`, `rendemo_list_sandbox_pages`, `rendemo_find_in_sandbox` or `rendemo_check_sandbox_demo`. A sandbox demo writes no markers into customer source and has no lockfile to commit. Tours are reserved for codebase guidance authored with `author-a-tour`. Covers surveying what the crawl actually captured, choosing steps and target elements that survive a rebuild, writing the step card, and verifying before publish.
+description: Create or edit hosted sandbox demos from crawled replicas, including durable targets and rebuilds.
 version: 2.4.0
 ---
 
@@ -20,15 +20,14 @@ Everything below follows from that. You are not writing markers; you are choosin
 enough to be re-found later, and you cannot see the page — you are reading an index of it.
 
 `demo-craft` governs how the finished demo behaves: cards, emphasis, pointers, effects, and the
-player. Read it too. This skill covers what is unique to a sandbox-backed demo: surveying replica
+player. Load it when changing those aspects. This skill covers what is unique to a sandbox-backed demo: surveying replica
 pages, choosing durable targets, validating them after rebuilds, and publishing the hosted result.
 
-## Ask before you dress it
+## Choose the look from the brief
 
-The look of the demo is the author's call, not yours — and "the author" is the person you are
-talking to, not the model's taste. Before styling anything (and ideally while the crawl runs, when
-you have their attention and nothing else to do), ask two or three short questions and then commit
-the answers with `rendemo_set_demo_presentation_theme`:
+Respect the author's existing preferences and brand. Infer routine styling from the brief, state
+the choice, and set it with `rendemo_set_demo_presentation_theme`. Ask only when competing
+directions would materially change the result. The available choices are:
 
 1. **Vibe** — offer the two or three themes that fit their product and let them pick. The menu:
    - `broadsheet` — editorial, hairline rules, paper tone. Analytics, research, fintech; anything sold on credibility.
@@ -46,15 +45,12 @@ the answers with `rendemo_set_demo_presentation_theme`:
 3. **Accent** — `accentMode`: `brand` (their colour does the pointing — the usual right answer),
    `neutral`, or `contrast`. If they name a hex, that is a brand kit question (`rendemo_design_brand_style`).
 
-Two rules around the questions. **Suggest, don't interrogate**: lead with your read ("your site is
-dark and developer-facing — I'd put this in `console` with cinematic motion; want that or something
-calmer?") so the person can just say yes. And **never silently default**: `signal` exists for when
-they truly don't care, but they get asked once before you decide that.
+Offer a recommendation when clarification is useful; existing preferences need no reconfirmation.
 
 ## Getting the sandbox
 
-**The first step is a question, not a crawl.** Ask the author whether the demo should show anything
-behind a login — their dashboard, their account, their data. People rarely volunteer this, and the
+**Resolve access before crawling.** If not established by the request, ask whether the demo needs
+to show anything behind a login — their dashboard, their account, their data. People rarely volunteer this, and the
 public marketing site is rarely the product they actually want demoed. Behind a login (or unsure)
 means `rendemo_start_browser_crawl` and the extension capture flow below; public pages only means
 `rendemo_crawl_site`.

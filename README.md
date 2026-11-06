@@ -98,7 +98,7 @@ edit command would make you know which state you are in before you could name th
   **That matters**: a marker left behind becomes an `orphan-marker` and `rendemo check` fails the
   build for whoever pushes next, which is the safety feature turning into a nuisance exactly when you
   are backing out. The two edits land as one reviewable diff.
-- **Retire the whole tour** — `rendemo_remove_tour` takes it offline, hands back every marker to
+- **Retire the whole tour** — `rendemo_unpublish_tour` takes it offline, hands back every marker to
   strip, and returns `rendemo.tours.json` with only that entry removed. `rendemo_take_demo_offline`
   is the *kill switch* by comparison: instant, touches no files, right when a live tour is pointing
   at UI that just moved. **Neither deletes anything** — the published plan is kept, so publishing

@@ -1,6 +1,6 @@
 ---
 name: author-a-tour
-description: 'Use when the user asks to create or change a CODEBASE TOUR inside their own live product, or mentions data-rendemo markers, rendemo.tours.json, rendemo_create_tour, rendemo_add_tour_step, rendemo_list_tours, rendemo_probe_tour_targets, or the tour lockfile. A tour always runs in customer code and requires source markers. A crawled hosted replica is a sandbox demo and must use the sandbox-demos skill instead.'
+description: Create or edit codebase tours that guide users through a live product using data-rendemo source markers.
 version: 1.0.0
 ---
 
@@ -216,7 +216,7 @@ a retry:
   the payload builder, so the button would just vanish for the viewer. Edit those choices with
   `rendemo_update_step` first — the message names which steps.
 - **It is the last step.** A tour with no steps cannot be previewed or published. Retiring the whole
-  tour is a different, deliberate act — `rendemo_remove_tour`, see "Retiring a tour" below.
+  tour is a different, deliberate act — `rendemo_unpublish_tour`, see "Retiring a tour" below.
 
 **After ANY of the four, in this order and without skipping:**
 
@@ -709,7 +709,7 @@ auth — but once the markers and the element are gone nothing is asking for the
 Use it when you are removing a tour from a repo you are already working in: it does the tedious half
 (finding every marker) in one pass and produces the same reviewable diff you would have written.
 
-`rendemo_remove_tour({ projectId, lockfile })` is the retirement done through the MCP, and is what to
+`rendemo_unpublish_tour({ projectId, lockfile })` is the retirement done through the MCP, and is what to
 use when the tour must also stop being **served**. It does all three halves in one reviewable change:
 
 1. takes the tour offline (it stops being served within 30 seconds),

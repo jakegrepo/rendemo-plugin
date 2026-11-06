@@ -43,7 +43,7 @@ The skill has the full procedure. What must not be improvised:
   live tour is the old one and the committed `rendemo.tours.json` still describes the old steps.
 - **Preview before you publish**, the same as the first time.
 - **Retiring a tour is not the kill switch.** `rendemo_take_demo_offline` stops it being served and
-  touches no files; `rendemo_remove_tour` also hands back every marker to strip and the lockfile with
+  touches no files; `rendemo_unpublish_tour` also hands back every marker to strip and the lockfile with
   the entry gone, so the retirement lands as one commit that still passes `rendemo check`. Nothing is
   deleted either way — the published plan is kept and publishing again serves the identical tour.
 
